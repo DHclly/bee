@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="shortcut icon" href="/static/redoc/favicon.png" />
+    <link rel="stylesheet" href="/static/home/bulma.min.css" />
+    <title>{{ title }}</title>
+    <style>
+      .url {
+        margin-top: 20px;
+      }
+      .button {
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container is-fluid">
+      <section class="hero is-warning">
+        <div class="hero-body">
+          <p class="title">Welcome to Bee</p>
+          <p class="subtitle">A lightweight LLM API proxy</p>
+        </div>
+      </section>
+      <hr />
+      <div class="box">
+        <a
+          class="button is-warning"
+          href="static/home/test-command.html"
+          target="_blank"
+          >测试命令参考页</a
+        >
+      </div>
+      <div class="columns url" style="min-height: 400px;">
+        <div class="column is-3"></div>
+        <div class="column is-6">
+          <div class="field is-grouped">
+            <p class="control is-expanded">
+              <input
+                id="swagger-url"
+                class="input"
+                type="text"
+                placeholder="Find a repository"
+                disabled
+                value=""
+              />
+            </p>
+            <p class="control">
+              <button class="button is-warning" id="swagger-btn">
+                访问 swagger ui
+              </button>
+            </p>
+          </div>
+          <div class="field is-grouped">
+            <p class="control is-expanded">
+              <input
+                id="redoc-url"
+                class="input"
+                type="text"
+                placeholder="Find a repository"
+                disabled
+                value=""
+              />
+            </p>
+            <p class="control">
+              <button class="button is-warning" id="redoc-btn">
+                访问 redoc ui &nbsp;&nbsp;&nbsp;
+              </button>
+            </p>
+          </div>
+        </div>
+        <div class="column is-3"></div>
+      </div>
+      <footer class="footer">
+        <div class="content has-text-centered">
+          <p><strong>Bee</strong> ,a lightweight LLM API proxy.</p>
+        </div>
+      </footer>
+    </div>
+    <script>
+      var base_url = window.location.origin;
+      document.getElementById("swagger-url").value = base_url + "/docs";
+      document.getElementById("redoc-url").value = base_url + "/redoc";
+      document
+        .getElementById("swagger-btn")
+        .addEventListener("click", function () {
+          window.open(document.getElementById("swagger-url").value);
+        });
+      document
+        .getElementById("redoc-btn")
+        .addEventListener("click", function () {
+          window.open(document.getElementById("redoc-url").value);
+        });
+    </script>
+  </body>
+</html>

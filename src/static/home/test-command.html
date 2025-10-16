@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="shortcut icon" href="/static/redoc/favicon.png" />
+    <link rel="stylesheet" href="/static/home/bulma.min.css" />
+    <title>测试命令参考 - bee</title>
+  </head>
+  <body>
+    <div class="container">
+      <div class="content">
+        <h3>测试命令参考</h3>
+        <h4>问答对话大模型</h4>
+        <pre><code>curl http://localhost:80/v1/chat/completions \
+-H "Content-Type: application/json" \
+-H "Authorization: Bearer sk_123" \
+-d '{
+    "stream": true,
+    "temperature": 1,
+    "top_p": 1,
+    "max_tokens": 16384,
+    "model": "qwen2.5-7b-instruct",
+    "messages": [
+        {
+            "role": "system",
+            "content": "你是一位超级厉害的导游，精通中国各个城市信息"
+        },
+        {
+            "role": "user",
+            "content": "北上广是哪里"
+        }
+    ]
+}'</code></pre>
+        <h4>向量模型</h4>
+        <pre><code>curl http://localhost:80/v1/embeddings \
+-H "Content-Type: application/json" \
+-H "Authorization: Bearer sk_123" \
+-d '{
+  "model": "bge-m3",
+  "input": [
+    "hi",
+    "123"
+  ]
+}'</code></pre>
+        <h4>重排模型</h4>
+        <pre><code>curl http://localhost:80/v1/rerank \
+-H "Content-Type: application/json" \
+-H "Authorization: Bearer sk_123" \
+-d '{
+  "model": "bge-reranker-v2-m3",
+  "top_n": 3,
+  "query": "11",
+  "documents": [
+    "1123",
+    "123"
+  ]
+}'</code></pre>
+        <h4>多模态大模型</h4>
+        <pre style="word-wrap: break-word;white-space: pre-wrap;"><code>curl http://localhost:80/v1/chat/completions \
+-H "Content-Type: application/json" \
+-H "Authorization: Bearer sk_123" \
+-d '{
+  "stream": true,
+  "temperature": 1,
+  "top_p": 1,
+  "max_tokens": 4096,
+  "model": "qwen2-vl-7b-instruct",
+  "messages": [
+    {
+      "role": "user",
+      "content": [
+        {
+          "type": "image_url",
+          "image_url": {
+            "url": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAAgACMDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD3misjxPrv/CN+HrzVBZT3jW8TyLDCMbtqFzuboigKSSfoAWKqbeoz30Fuv9nWSXdw77Qss/kxoMElnbDEDjHyqxyRwBlgAXKKwNN17UL/AE/Ud2jeVqthdG0ktBdK0bMQjK4lwP3ZSRGJ27gNw2kgAyaLrV9e6pqGl6ppiWV5ZpFKDDc+fFNFJuCsrFVYENHIpBUdARkGgDbooooAxPGUE114G8QW9vE808um3KRxxqWZ2MTAAAckk9qp+OtW1fSdDg/sW1nkubu6jtXuIbV7k2UbZ3T+UoJfaBwOmSOvQ9PRQBzljLYJ4bvJbe31idHc/a5HtpoLuZiFDy4ZUckKRjyxwFCxj5VUV/CcE0Oqaq9tFqKaLMkD2zaipErzfOsp/efvyMLEAZueML8gWurooAKKKKAP/9k="
+          }
+        },
+        {"type": "text", "text": "图片上是什么"}
+      ]
+    }
+  ]
+}'</code></pre>
+      </div>
+    </div>
+  </body>
+</html>
