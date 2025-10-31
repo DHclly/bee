@@ -1,9 +1,9 @@
-from dotenv import load_dotenv
 # 加载 .env 文件
+from dotenv import load_dotenv
 load_dotenv()
-from services import log_service
-log_service.get_logger()
-logger=log_service.logger
+
+from services.log_service import get_logger
+logger=get_logger(server_name="bee")
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
