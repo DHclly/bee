@@ -277,7 +277,4 @@ def test_log():
     logger.info("--------------------------")
 
 if __name__ == '__main__':
-    test_log()
-
-if __name__ == '__main__':
     raise Exception("This is a module, not a script, can not run directly.")
