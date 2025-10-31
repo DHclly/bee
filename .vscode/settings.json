@@ -1,0 +1,26 @@
+{
+    // 定义 Windows 上可用的终端配置文件
+    "terminal.integrated.profiles.windows": {
+        "PowerShell": {
+            "source": "PowerShell",
+            "icon": "terminal-powershell"
+        },
+        "Command Prompt": {
+            "path": [
+                "${env:windir}\\Sysnative\\cmd.exe"
+            ],
+            "args": [],
+            "icon": "terminal-cmd"
+        },
+        "Git Bash": {
+            "path": "D:\\app-install\\Git\\bin\\bash.exe",
+            "args": ["--login", "-i"],
+            "icon": "terminal"
+        },
+        "WSL: Ubuntu": {
+            "path": "wsl.exe",
+            "args": ["-d", "Ubuntu"],
+            "icon": "terminal-ubuntu"
+        }
+    }
+}
