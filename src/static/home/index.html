@@ -13,14 +13,37 @@
       .button {
         cursor: pointer;
       }
+      .is-200x200 {
+        width: 200px;
+        height: 200px;
+      }
+
+      .logo-panel {
+        display: flex;
+        align-items: center; /* 垂直居中 */
+        justify-content: flex-start; /* 图片靠左 */
+      }
+
+      .logo-image {
+        margin-right: 20px; /* 图片与文本之间的间距 */
+      }
     </style>
   </head>
   <body>
     <div class="container is-fluid">
       <section class="hero is-warning">
-        <div class="hero-body">
-          <p class="title">Welcome to Bee</p>
-          <p class="subtitle">A lightweight LLM API proxy</p>
+        <div class="hero-body logo-panel">
+          <figure class="image is-200x200 logo-image">
+            <img
+              class="is-rounded"
+              src="static/home/bee-200.png"
+              alt="Bee Logo"
+            />
+          </figure>
+          <div class="logo-text">
+            <h1 class="title">Welcome to Bee</h1>
+            <h2 class="subtitle">A lightweight LLM API proxy</h2>
+          </div>
         </div>
       </section>
       <hr />
@@ -32,7 +55,7 @@
           >测试命令参考页</a
         >
       </div>
-      <div class="columns url" style="min-height: 400px;">
+      <div class="columns url" style="min-height: 400px">
         <div class="column is-3"></div>
         <div class="column is-6">
           <div class="field is-grouped">

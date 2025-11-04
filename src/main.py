@@ -45,7 +45,7 @@ if env_service.get_show_swagger()=="true":
             "swagger/index.html",
             {
                 "request": request,
-                "title": "swwagger - bee",
+                "title": "swagger - bee",
                 "openapi_url": app.openapi_url,
             }
         )

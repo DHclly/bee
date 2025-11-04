@@ -1,15 +1,14 @@
-
-    <!DOCTYPE html>
-    <html>
-    <head>
+<!DOCTYPE html>
+<html>
+  <head>
     <title>{{ title }}</title>
     <!-- needed for adaptive design -->
-    <meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    
-    <link href="/static/redoc/montserrat-roboto.css" rel="stylesheet">
-    
-    <link rel="shortcut icon" href="/static/redoc/favicon.png">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <link href="/static/redoc/montserrat-roboto.css" rel="stylesheet" />
+
+    <link rel="shortcut icon" href="/static/redoc/favicon.png" />
     <!--
     ReDoc doesn't change outer page styles
     -->
@@ -18,14 +17,134 @@
         margin: 0;
         padding: 0;
       }
+      .gDfmoL,.cJteCP > ul > li {
+        border-color: #ffb70f !important;
+        color: #ffb70f !important;
+      }
+
+      .bOFhJE,
+      .gwMRTQ {
+        background-color: #fff8e9 !important;
+      }
+
+      .info,.sc-kAyceB.XMnSL{
+        display: flex;
+        align-items: center; /* 垂直居中 */
+        justify-content: flex-start; /* 图片靠左 */
+      }
+
+      .info-image{
+        margin-right: 20px; /* 图片与文本之间的间距 */
+        border-radius: 9999px;
+      }
+
+      .info-text{
+        flex: 1;/* 剩余空间全部分配给文本 */
+      }
     </style>
-    </head>
-    <body>
+  </head>
+  <body>
     <noscript>
-        ReDoc requires Javascript to function. Please enable it to browse the documentation.
+      ReDoc requires Javascript to function. Please enable it to browse the
+      documentation.
     </noscript>
     <redoc spec-url="{{ openapi_url }}"></redoc>
-    <script src="/static/redoc/redoc.standalone.js"> </script>
-    </body>
-    </html>
-    
+    <script src="/static/redoc/redoc.standalone.js"></script>
+    <script>
+            /**
+       * 定期检查条件函数 `whenFn`，并在条件满足时执行操作函数 `doFn`。
+       * 如果 `once` 为 `true`，则只执行一次 `doFn`。
+       *
+       * @param {Function} [whenFn] - 条件函数，返回布尔值，用于判断是否执行 `doFn`。默认为空函数。
+       * @param {Function} [doFn] - 操作函数，当 `whenFn` 返回 `true` 时执行。默认为空函数。
+       * @param {number} [ms=20] - 检查间隔时间（毫秒）。最小值为 20 毫秒。
+       * @param {boolean} [once=true] - 布尔值，决定是否只执行一次 `doFn`。
+       */
+      var execUntil = function (whenFn, doFn, ms, once) {
+        // 如果 whenFn 未提供，则设置为一个空函数
+        if (whenFn == null || whenFn == undefined) {
+          whenFn = function () {};
+        }
+
+        // 如果 doFn 未提供，则设置为一个空函数
+        if (doFn == null || doFn == undefined) {
+          doFn = function () {};
+        }
+
+        if (ms == null || ms == undefined) {
+          ms = 50;
+        }
+
+        if (ms <= 20) {
+          ms = 20;
+        }
+
+        if (ms >= 1000) {
+          ms = 1000;
+        }
+
+        // 如果 once 未提供，则设置为 true
+        if (once == null || once == undefined) {
+          once = true;
+        }
+
+        // 设置一个定时器，每隔 ms 毫秒执行一次
+        var timer = setInterval(function () {
+          // 如果 whenFn 返回 true
+          if (whenFn()) {
+            // 执行 doFn
+            doFn();
+
+            // 如果 once 为 true，则清除定时器，只执行一次
+            if (once) {
+              clearInterval(timer);
+            }
+          }
+        }, ms);
+      };
+
+      // 等待 Swagger UI 渲染完成
+      function insertLogo() {
+        const infoEl = document.querySelector(".sc-kAyceB.XMnSL");
+        if (!infoEl) return;
+
+        // 移除观察器，避免重复执行
+        if (window.logoInserted) return;
+        window.logoInserted = true;
+
+        // 创建 logo 图片
+        const logo = document.createElement("img");
+        logo.src = "/static/redoc/bee-200.png";
+        logo.alt = "Bee Logo";
+        logo.className = "info-image";
+
+        // 创建一个 flex 容器包裹 logo + 原 .info 内容
+        const infoTextEl = document.createElement("div");
+        infoTextEl.className = "info-text";
+        infoTextEl.style.display = "flex";
+        infoTextEl.style.alignItems = "flex-start"; // 因为 description 可能多行
+
+        // 把 logo 和原 .info 的所有子节点移入 wrapper
+        while (infoEl.firstChild) {
+          infoTextEl.appendChild(infoEl.firstChild);
+        }
+
+        // 先插入 logo 到 wrapper 开头
+        infoEl.appendChild(logo);
+
+        // 把 wrapper 放回原 .info 位置
+        infoEl.appendChild(infoTextEl);
+      }
+
+      execUntil(
+        function () {
+          const infoEl = document.querySelector(".sc-kAyceB.XMnSL");
+          return infoEl != null && infoEl != undefined;
+        },
+        function () {
+          insertLogo();
+        }
+      );
+    </script>
+  </body>
+</html>
