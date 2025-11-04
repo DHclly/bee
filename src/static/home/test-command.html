@@ -6,13 +6,19 @@
     <link rel="shortcut icon" href="/static/redoc/favicon.png" />
     <link rel="stylesheet" href="/static/home/bulma.min.css" />
     <title>测试命令参考 - bee</title>
+    <style>
+      pre.code {
+        word-wrap: break-word;
+        white-space: pre-wrap;
+      }
+    </style>
   </head>
   <body>
     <div class="container">
       <div class="content">
         <h3>测试命令参考</h3>
-        <h4>问答对话大模型</h4>
-        <pre><code>curl http://localhost:80/v1/chat/completions \
+        <h4>01问答对话大模型</h4>
+        <pre class="code"><code>curl http://localhost:80/v1/chat/completions \
 -H "Content-Type: application/json" \
 -H "Authorization: Bearer sk_123" \
 -d '{
@@ -24,40 +30,46 @@
     "messages": [
         {
             "role": "system",
-            "content": "你是一位超级厉害的导游，精通中国各个城市信息"
+            "content": "你是一位超级厉害的导游，精通中国各个城市信息，回答简单明了"
         },
         {
             "role": "user",
-            "content": "北上广是哪里"
+            "content": "北上广是指的哪里，简单回答我"
         }
     ]
 }'</code></pre>
-        <h4>向量模型</h4>
-        <pre><code>curl http://localhost:80/v1/embeddings \
+        <h4>02向量模型</h4>
+        <pre class="code"><code>curl http://localhost:80/v1/embeddings \
 -H "Content-Type: application/json" \
 -H "Authorization: Bearer sk_123" \
 -d '{
   "model": "bge-m3",
   "input": [
-    "hi",
-    "123"
+    "Apple 是一家伟大的公司，他们的主要产品有 iPhone、iPad 和 Mac。",
+    "Microsoft 是一家伟大的公司，他们的主要产品有 Windows、Xbox 和 Surface。",
+    "OpenAI 是一家伟大的公司，他们的主要产品有 GPT-3。"
+    "OpenAI 的创始人是 Sam Altman",
+    "Apple 的创始人是 Steve Jobs"
   ]
 }'</code></pre>
-        <h4>重排模型</h4>
-        <pre><code>curl http://localhost:80/v1/rerank \
+        <h4>03重排模型</h4>
+        <pre class="code"><code>curl http://localhost:80/v1/rerank \
 -H "Content-Type: application/json" \
 -H "Authorization: Bearer sk_123" \
 -d '{
   "model": "bge-reranker-v2-m3",
   "top_n": 3,
-  "query": "11",
+  "query": "苹果公司的产品有哪些？",
   "documents": [
-    "1123",
-    "123"
+    "Apple 是一家伟大的公司，他们的主要产品有 iPhone、iPad 和 Mac。",
+    "Microsoft 是一家伟大的公司，他们的主要产品有 Windows、Xbox 和 Surface。",
+    "OpenAI 是一家伟大的公司，他们的主要产品有 GPT-3。"
+    "OpenAI 的创始人是 Sam Altman",
+    "Apple 的创始人是 Steve Jobs"
   ]
 }'</code></pre>
-        <h4>多模态大模型</h4>
-        <pre style="word-wrap: break-word;white-space: pre-wrap;"><code>curl http://localhost:80/v1/chat/completions \
+        <h4>04多模态大模型</h4>
+        <pre class="code"><code>curl http://localhost:80/v1/chat/completions \
 -H "Content-Type: application/json" \
 -H "Authorization: Bearer sk_123" \
 -d '{
@@ -81,7 +93,12 @@
     }
   ]
 }'</code></pre>
+        <h4>05OCR文字识别</h4>
+        <pre class="code"><code></code></pre>
+        <h4>06ASR语音识别</h4>
+        <pre class="code"><code></code></pre>
       </div>
+      <div></div>
     </div>
   </body>
 </html>
