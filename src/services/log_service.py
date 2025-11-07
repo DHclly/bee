@@ -127,10 +127,7 @@ class LogServiceLogger(logging.Logger):
             str_value = f"{str_value[:truncate_length]}..."
         return str_value
 
-
-# 类型提示，告诉 IDE 这是个 Logger（可选）
-logger: Union[LogServiceLogger, None] = None
-
+logger = None
 
 def _get_log_level() -> int:
     """
