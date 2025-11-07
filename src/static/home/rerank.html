@@ -167,59 +167,27 @@
       input3.value =
         "OpenAI 是一家伟大的公司，他们的主要产品有 GPT-3、GPT-4o、GPT-5。";
 
-      if (
-        "embeddings_address" in localStorage &&
-        localStorage.getItem("embeddings_address").length > 0
-      ) {
+      if ("embeddings_address" in localStorage && localStorage.getItem("embeddings_address").length > 0) {
         address.value = localStorage.getItem("embeddings_address");
       }
-      if (
-        "embeddings_key" in localStorage &&
-        localStorage.getItem("embeddings_key").length > 0
-      ) {
+      if ("embeddings_key" in localStorage && localStorage.getItem("embeddings_key").length > 0) {
         key.value = localStorage.getItem("embeddings_key");
       }
 
-      if (
-        "embeddings_modelName" in localStorage &&
-        localStorage.getItem("embeddings_modelName").length > 0
-      ) {
+      if ("embeddings_modelName" in localStorage && localStorage.getItem("embeddings_modelName").length > 0) {
         modelName.value = localStorage.getItem("embeddings_modelName");
       }
 
-      if (
-        "embeddings_input1" in localStorage &&
-        localStorage.getItem("embeddings_input1").length > 0
-      ) {
+      if ("embeddings_input1" in localStorage && localStorage.getItem("embeddings_input1").length > 0) {
         input1.value = localStorage.getItem("embeddings_input1");
       }
 
-      if (
-        "embeddings_input2" in localStorage &&
-        localStorage.getItem("embeddings_input2").length > 0
-      ) {
+      if ("embeddings_input2" in localStorage && localStorage.getItem("embeddings_input2").length > 0) {
         input2.value = localStorage.getItem("embeddings_input2");
       }
 
-      if (
-        "embeddings_input3" in localStorage &&
-        localStorage.getItem("embeddings_input3").length > 0
-      ) {
+      if ("embeddings_input3" in localStorage && localStorage.getItem("embeddings_input3").length > 0) {
         input3.value = localStorage.getItem("embeddings_input3");
-      }
-
-      if (
-        "embeddings_modelDimensions" in localStorage &&
-        localStorage.getItem("embeddings_modelDimensions").length > 0
-      ) {
-        input3.value = localStorage.getItem("embeddings_modelDimensions");
-      }
-
-      if (
-        "embeddings_result" in localStorage &&
-        localStorage.getItem("embeddings_result").length > 0
-      ) {
-        input3.value = localStorage.getItem("embeddings_result");
       }
 
       tipAddress.style.display = "none";
@@ -281,11 +249,6 @@
         })
           .then((response) => response.json())
           .then((res_data) => {
-            if (res_data.data == undefined) {
-              result.value = JSON.stringify(res_data, null, 2);
-              return;
-            }
-            
             let data = res_data.data;
             modelDimensions.value = data[0].embedding.length;
             data.forEach((e) => {
@@ -295,12 +258,6 @@
             let json_text = JSON.stringify(res_data, null, 2);
             json_text = json_text.replace(/\"...\"/g, "...");
             result.value = json_text;
-
-            localStorage.setItem(
-              "embeddings_modelDimensions",
-              modelDimensions.value
-            );
-            localStorage.setItem("embeddings_result", result.value);
           })
           .catch((error) => console.error("Error:", error));
       });
