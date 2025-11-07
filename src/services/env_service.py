@@ -25,8 +25,5 @@ def get_show_swagger():
 def get_show_redoc():
     return os.getenv('bee_show_redoc', 'true')
 
-def get_api_auth():
-    return os.getenv('bee_api_auth', 'true')
-
 def get_log_level():
     return os.getenv('bee_log_level', 'info')

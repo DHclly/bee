@@ -1,20 +1,10 @@
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
-from services import env_service
-
 security = HTTPBearer(auto_error=False,description="模型 API 密钥,如：sk-xxxxxx")
 
-def get_bearer_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
-    
-    # 手动控制错误信息
+def get_bearer_token(credentials: HTTPAuthorizationCredentials = Depends(security))->str:
+    # 没有秘钥就返回默认值
     if not credentials:
-        if env_service.get_api_auth() == "true":
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="没有授权，请在 swagger 右上角 Authorize 按钮传密钥或者在请求头 Authorization 里面添加模型 API 密钥",
-                headers={"WWW-Authenticate": "Bearer"},
-            )
-        else:
-            return None
+        return "sk-default"
     return credentials.credentials
