@@ -5,6 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="shortcut icon" href="/static/redoc/favicon.png" />
     <link rel="stylesheet" href="/static/home/bulma.min.css" />
+    <style>
+      /* .visual .result-item .progress {
+        height: 30px;
+      }
+
+      .visual .result-item .tag {
+        position: relative;
+        top: -40px;
+        left: 10px;
+      } */
+
+      .tabs-result li span {
+        color: var(--bulma-warning);
+      }
+
+      .tabs-result li.is-active span {
+        color: var(--bulma-link);
+        font-weight: bold;
+      }
+    </style>
     <title>Rerank</title>
   </head>
   <body>
@@ -132,27 +152,36 @@
           </div>
         </div>
         <div class="column">
-          <div class="field">
-            <label class="label">模型维度：</label>
-            <div class="control">
-              <input
-                id="model-dimensions"
-                class="input is-warning"
-                type="number"
-                placeholder="0"
-                disabled
-              />
+          <div class="tabs tabs-result is-centered is-boxed is-warning">
+            <ul>
+              <li class="is-active">
+                <a>
+                  <span>可视化</span>
+                </a>
+              </li>
+              <li>
+                <a>
+                  <span>JSON 数据</span>
+                </a>
+              </li>
+            </ul>
+          </div>
+          <div id="json-data">
+            <div class="field">
+              <label class="label">返回结果：</label>
+              <textarea
+                id="result"
+                class="textarea is-warning"
+                rows="20"
+                placeholder="输出结果"
+              ></textarea>
             </div>
           </div>
-
-          <div class="field">
-            <label class="label">返回结果：</label>
-            <textarea
-              id="result"
-              class="textarea is-warning"
-              rows="20"
-              placeholder="输出结果"
-            ></textarea>
+          <div id="visual" class="visual">
+            <div class="field">
+              <label class="label">返回结果：</label>
+            </div>
+            <div class="result-list" id="result-list"></div>
           </div>
         </div>
       </div>
@@ -168,11 +197,17 @@
       const input3 = document.querySelector("#input-3");
       const send = document.querySelector("#send");
       const result = document.querySelector("#result");
-      const modelDimensions = document.querySelector("#model-dimensions");
       const tipAddress = document.querySelector("#tip-address");
       const tipModelName = document.querySelector("#tip-model-name");
       const tipQuestion = document.querySelector("#tip-question");
       const tipInput = document.querySelector("#tip-input");
+      const jsonData = document.querySelector("#json-data");
+      const visual = document.querySelector("#visual");
+      const tabsVisual = document.querySelector(".tabs-result li:nth-child(1)");
+      const tabsJsonData = document.querySelector(
+        ".tabs-result li:nth-child(2)"
+      );
+      const resultList = document.querySelector("#result-list");
 
       address.value = `${location.origin}/v1/rerank`;
       modelName.value = "bge-reranker-v2-m3";
@@ -183,6 +218,9 @@
         "Microsoft 是一家伟大的公司，他们的主要产品有 Windows、Xbox 和 Surface。";
       input3.value =
         "OpenAI 是一家伟大的公司，他们的主要产品有 GPT-3、GPT-4o、GPT-5。";
+
+      visual.style.display = "block";
+      jsonData.style.display = "none";
 
       if (
         "rerank_address" in localStorage &&
@@ -233,17 +271,11 @@
       }
 
       if (
-        "rerank_modelDimensions" in localStorage &&
-        localStorage.getItem("rerank_modelDimensions").length > 0
-      ) {
-        modelDimensions.value = localStorage.getItem("rerank_modelDimensions");
-      }
-
-      if (
         "rerank_result" in localStorage &&
         localStorage.getItem("rerank_result").length > 0
       ) {
         result.value = localStorage.getItem("rerank_result");
+        renderResult(JSON.parse(result.value));
       }
 
       tipAddress.style.display = "none";
@@ -315,29 +347,67 @@
         })
           .then((response) => response.json())
           .then((res_data) => {
-            if (res_data.data == undefined) {
-              result.value = JSON.stringify(res_data, null, 2);
-              return;
-            }
-
-            let data = res_data.data;
-            modelDimensions.value = data[0].embedding.length;
-            data.forEach((e) => {
-              e.embedding = e.embedding.slice(0, 5);
-              e.embedding.push("...");
-            });
-            let json_text = JSON.stringify(res_data, null, 2);
-            json_text = json_text.replace(/\"...\"/g, "...");
-            result.value = json_text;
-
-            localStorage.setItem(
-              "rerank_modelDimensions",
-              modelDimensions.value
-            );
+            result.value = JSON.stringify(res_data, null, 2);
+            renderResult(res_data);
             localStorage.setItem("rerank_result", result.value);
           })
           .catch((error) => console.error("Error:", error));
       });
+
+      tabsVisual.addEventListener("click", () => {
+        tabsVisual.classList.add("is-active");
+        tabsJsonData.classList.remove("is-active");
+        visual.style.display = "block";
+        jsonData.style.display = "none";
+      });
+
+      tabsJsonData.addEventListener("click", () => {
+        tabsJsonData.classList.add("is-active");
+        tabsVisual.classList.remove("is-active");
+        visual.style.display = "none";
+        jsonData.style.display = "block";
+      });
+
+      function renderResult(jsonData) {
+        resultList.innerHTML = "";
+        let newHtml = "";
+        jsonData.results.forEach((item, index) => {
+          const score = item.relevance_score;
+          let percent = (score * 100).toFixed(2);
+          if (percent < 1) {
+            percent = 1;
+          }
+          newHtml += `
+                <div class="result-item">
+                ${index > 0 ? `<hr/>` : ``}
+                <div class="field has-addons">
+                  <p class="control">
+                    <a class="button is-static"> ${index + 1}. </a>
+                  </p>
+                  <div class="control is-expanded">
+                    <input
+                      class="input is-warning"
+                      type="text"
+                      value="${item.document.text}"
+                      readonly
+                    />
+                  </div>
+                </div>
+                <div class="field">
+                  <progress class="progress is-warning" value="${percent}" min="1" max="100">
+                    ${percent}%
+                  </progress>
+                </div>
+                <div class="field" style="margin-bottom: 12px;">
+                  <span class="tag is-warning is-light"
+                    >分数：<span class="score">${score.toFixed(5)}</span></span
+                  >
+                </div>
+              </div>
+            `;
+        });
+        resultList.innerHTML = newHtml;
+      }
     </script>
   </body>
 </html>
