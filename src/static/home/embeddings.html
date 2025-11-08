@@ -283,19 +283,19 @@
           }),
         })
           .then((response) => response.json())
-          .then((res_data) => {
-            if (res_data.data == undefined) {
-              eleResult.value = JSON.stringify(res_data, null, 2);
+          .then((resData) => {
+            if (resData.data == undefined) {
+              eleResult.value = JSON.stringify(resData, null, 2);
               return;
             }
 
-            let data = res_data.data;
+            let data = resData.data;
             eleModelDimensions.value = data[0].embedding.length;
             data.forEach((e) => {
               e.embedding = e.embedding.slice(0, 5);
               e.embedding.push("...");
             });
-            let json_text = JSON.stringify(res_data, null, 2);
+            let json_text = JSON.stringify(resData, null, 2);
             json_text = json_text.replace(/\"...\"/g, "...");
             eleResult.value = json_text;
 

@@ -130,7 +130,7 @@
         </div>
         <div class="column">
           <div class="field">
-            <label class="label">返回结果(json)：</label>
+            <label class="label">返回结果(json or sse)：</label>
             <textarea
               id="result-json"
               class="textarea is-warning"
@@ -167,7 +167,7 @@
         'input[name="describe-img"]'
       );
 
-      const eleTestImg = document.querySelector(".test-img");
+      const eleTestImg = document.querySelector(".test-img img");
 
       eleAddress.value = `${location.origin}/v1/chat/completions`;
       eleModelName.value = "qwen3";
@@ -201,17 +201,11 @@
       }
 
       if (
-        "chat_result_json" in localStorage &&
-        localStorage.getItem("chat_result_json").length > 0
+        "chat_result" in localStorage &&
+        localStorage.getItem("chat_result").length > 0
       ) {
-        eleResultJson.value = localStorage.getItem("chat_result_json");
-      }
-
-      if (
-        "chat_result_text" in localStorage &&
-        localStorage.getItem("chat_result_text").length > 0
-      ) {
-        eleResultText.value = localStorage.getItem("chat_result_text");
+        eleResultJson.value = localStorage.getItem("chat_result");
+        renderNoStreamMessage(JSON.parse(eleResultJson.value));
       }
 
       eleTestImg.style.display = "none";
@@ -269,33 +263,69 @@
           }
         });
 
-        if (isStream) {
-        } else {
-          fetch(eleAddress.value, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${eleKey.value}`,
+        const content = [];
+        if (isDescribeImg) {
+          content.push({
+            type: "image_url",
+            image_url: {
+              url: eleTestImg.src,
             },
-            body: JSON.stringify({
-              stream: false,
-              model: eleModelName.value,
-              top_p: 1,
-              max_tokens: 4096,
-              messages: [{ type: "text", text: eleQuestion.value }],
-            }),
-          })
+          });
+        }
+
+        content.push({ type: "text", text: eleQuestion.value });
+
+        const req1 = fetch(eleAddress.value, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${eleKey.value}`,
+          },
+          body: JSON.stringify({
+            stream: isStream,
+            model: eleModelName.value,
+            top_p: 1,
+            max_tokens: 4096,
+            messages: [
+              {
+                role: "user",
+                content: content,
+              },
+            ],
+          }),
+        });
+
+        if (isStream) {
+          eleResultJson.value = "";
+          eleResultText.value = "";
+          req1
+            .then((response) => {
+              if (!response.ok) {
+                const errorText = response.text();
+                throw new Error(`HTTP ${response.status}: ${errorText}`);
+              }
+              
+            })
+            .catch((error) => console.error("Error:", error));
+        } else {
+          req1
             .then((response) => response.json())
-            .then((res_data) => {
-              eleResultJson.value = JSON.stringify(res_data, null, 2);
-              if (res_data.results == undefined) {
+            .then((resData) => {
+              eleResultJson.value = JSON.stringify(resData, null, 2);
+              if (resData.choices == undefined) {
                 return;
               }
-              localStorage.setItem("chat_result_json", eleResultJson.value);
+
+              localStorage.setItem("chat_result", eleResultJson.value);
+              renderNoStreamMessage(resData);
             })
             .catch((error) => console.error("Error:", error));
         }
       });
+
+      function renderNoStreamMessage(resData) {
+        eleResultText.value = resData.choices[0].message.content;
+      }
     </script>
   </body>
 </html>

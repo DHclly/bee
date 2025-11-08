@@ -337,16 +337,16 @@
           }),
         })
           .then((response) => response.json())
-          .then((res_data) => {
-            eleResult.value = JSON.stringify(res_data, null, 2);
-            if (res_data.results == undefined) {
+          .then((resData) => {
+            eleResult.value = JSON.stringify(resData, null, 2);
+            if (resData.results == undefined) {
               eleTabsJsonData.classList.add("is-active");
               eleTabsVisual.classList.remove("is-active");
               eleVisual.style.display = "none";
               eleJsonData.style.display = "block";
               return;
             }
-            renderResult(res_data);
+            renderResult(resData);
             localStorage.setItem("rerank_result", eleResult.value);
           })
           .catch((error) => console.error("Error:", error));
