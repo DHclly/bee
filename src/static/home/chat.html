@@ -67,25 +67,25 @@
             <label class="label">stream 流式输出：</label>
             <div class="control">
               <label class="radio">
-                <input type="radio" name="stream" checked />
+                <input type="radio" name="stream" checked value="yes" />
                 是
               </label>
               <label class="radio">
-                <input type="radio" name="stream" />
+                <input type="radio" name="stream" value="no" />
                 否
               </label>
             </div>
           </div>
 
           <div class="field">
-            <label class="label">支持图片理解：</label>
+            <label class="label">图片理解：</label>
             <div class="control">
               <label class="radio">
-                <input type="radio" name="describe-img" />
+                <input type="radio" name="describe-img" value="yes" />
                 是
               </label>
               <label class="radio">
-                <input type="radio" name="describe-img" checked />
+                <input type="radio" name="describe-img" checked value="no" />
                 否
               </label>
             </div>
@@ -94,7 +94,10 @@
           <div class="field test-img">
             <label class="label">测试图片：</label>
             <div class="control">
-              <figure class="image" style="width: 35px; height: 32px">
+              <figure
+                class="image"
+                style="width: 35px; height: 32px; border: 1px solid #000"
+              >
                 <img
                   src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAAgACMDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD3misjxPrv/CN+HrzVBZT3jW8TyLDCMbtqFzuboigKSSfoAWKqbeoz30Fuv9nWSXdw77Qss/kxoMElnbDEDjHyqxyRwBlgAXKKwNN17UL/AE/Ud2jeVqthdG0ktBdK0bMQjK4lwP3ZSRGJ27gNw2kgAyaLrV9e6pqGl6ppiWV5ZpFKDDc+fFNFJuCsrFVYENHIpBUdARkGgDbooooAxPGUE114G8QW9vE808um3KRxxqWZ2MTAAAckk9qp+OtW1fSdDg/sW1nkubu6jtXuIbV7k2UbZ3T+UoJfaBwOmSOvQ9PRQBzljLYJ4bvJbe31idHc/a5HtpoLuZiFDy4ZUckKRjyxwFCxj5VUV/CcE0Oqaq9tFqKaLMkD2zaipErzfOsp/efvyMLEAZueML8gWurooAKKKKAP/9k="
                 />
@@ -159,6 +162,13 @@
       const eleTipAddress = document.querySelector("#tip-address");
       const eleTipModelName = document.querySelector("#tip-model-name");
       const eleTipQuestion = document.querySelector("#tip-question");
+      const eleStream = document.querySelectorAll('input[name="stream"]');
+      const eleDescribeImg = document.querySelectorAll(
+        'input[name="describe-img"]'
+      );
+
+      const eleTestImg = document.querySelector(".test-img");
+
       eleAddress.value = `${location.origin}/v1/chat/completions`;
       eleModelName.value = "qwen3";
       eleQuestion.value = "苹果公司的产品有哪些？";
@@ -204,9 +214,21 @@
         eleResultText.value = localStorage.getItem("chat_result_text");
       }
 
+      eleTestImg.style.display = "none";
       eleTipAddress.style.display = "none";
       eleTipModelName.style.display = "none";
       eleTipQuestion.style.display = "none";
+
+      eleDescribeImg.forEach((item) => {
+        item.addEventListener("click", () => {
+          if (item.value == "yes") {
+            eleTestImg.style.display = "block";
+            eleQuestion.value = "描述一下图片内容";
+          } else {
+            eleTestImg.style.display = "none";
+          }
+        });
+      });
 
       eleSend.addEventListener("click", () => {
         if (eleAddress.value.length === 0) {
@@ -233,28 +255,46 @@
         localStorage.setItem("chat_modelName", eleModelName.value);
         localStorage.setItem("chat_question", eleQuestion.value);
 
-        fetch(eleAddress.value, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${eleKey.value}`,
-          },
-          body: JSON.stringify({
-            model: eleModelName.value,
-            top_n: documents.length,
-            query: eleQuestion.value,
-            documents: documents,
-          }),
-        })
-          .then((response) => response.json())
-          .then((res_data) => {
-            eleResultJson.value = JSON.stringify(res_data, null, 2);
-            if (res_data.results == undefined) {
-              return;
-            }
-            localStorage.setItem("chat_result_json", eleResultJson.value);
+        let isStream = false;
+        let isDescribeImg = false;
+        eleStream.forEach((item) => {
+          if (item.checked) {
+            isStream = item.value == "yes";
+          }
+        });
+
+        eleDescribeImg.forEach((item) => {
+          if (item.checked) {
+            isDescribeImg = item.value == "yes";
+          }
+        });
+
+        if (isStream) {
+        } else {
+          fetch(eleAddress.value, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${eleKey.value}`,
+            },
+            body: JSON.stringify({
+              stream: false,
+              model: eleModelName.value,
+              top_p: 1,
+              max_tokens: 4096,
+              messages: [{ type: "text", text: eleQuestion.value }],
+            }),
           })
-          .catch((error) => console.error("Error:", error));
+            .then((response) => response.json())
+            .then((res_data) => {
+              eleResultJson.value = JSON.stringify(res_data, null, 2);
+              if (res_data.results == undefined) {
+                return;
+              }
+              localStorage.setItem("chat_result_json", eleResultJson.value);
+            })
+            .catch((error) => console.error("Error:", error));
+        }
       });
     </script>
   </body>
