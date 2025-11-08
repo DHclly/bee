@@ -47,6 +47,7 @@
                 class="input is-warning"
                 type="text"
                 placeholder="http://localhost:8000/v1/rerank"
+                autocomplete="off"
               />
             </div>
           </div>
@@ -188,188 +189,195 @@
     </div>
 
     <script>
-      const address = document.querySelector("#address");
-      const key = document.querySelector("#key");
-      const modelName = document.querySelector("#model-name");
-      const question = document.querySelector("#question");
-      const input1 = document.querySelector("#input-1");
-      const input2 = document.querySelector("#input-2");
-      const input3 = document.querySelector("#input-3");
-      const send = document.querySelector("#send");
-      const result = document.querySelector("#result");
-      const tipAddress = document.querySelector("#tip-address");
-      const tipModelName = document.querySelector("#tip-model-name");
-      const tipQuestion = document.querySelector("#tip-question");
-      const tipInput = document.querySelector("#tip-input");
-      const jsonData = document.querySelector("#json-data");
-      const visual = document.querySelector("#visual");
-      const tabsVisual = document.querySelector(".tabs-result li:nth-child(1)");
-      const tabsJsonData = document.querySelector(
+      const eleAddress = document.querySelector("#address");
+      const eleKey = document.querySelector("#key");
+      const eleModelName = document.querySelector("#model-name");
+      const eleQuestion = document.querySelector("#question");
+      const eleInput1 = document.querySelector("#input-1");
+      const eleInput2 = document.querySelector("#input-2");
+      const eleInput3 = document.querySelector("#input-3");
+      const eleSend = document.querySelector("#send");
+      const eleResult = document.querySelector("#result");
+      const eleTipAddress = document.querySelector("#tip-address");
+      const eleTipModelName = document.querySelector("#tip-model-name");
+      const eleTipQuestion = document.querySelector("#tip-question");
+      const eleTipInput = document.querySelector("#tip-input");
+      const eleJsonData = document.querySelector("#json-data");
+      const eleVisual = document.querySelector("#visual");
+      const eleTabsVisual = document.querySelector(".tabs-result li:nth-child(1)");
+      const eleTabsJsonData = document.querySelector(
         ".tabs-result li:nth-child(2)"
       );
-      const resultList = document.querySelector("#result-list");
+      const eleResultList = document.querySelector("#result-list");
 
-      address.value = `${location.origin}/v1/rerank`;
-      modelName.value = "bge-reranker-v2-m3";
-      question.value = "苹果公司的产品有哪些？";
-      input1.value =
+      eleAddress.value = `${location.origin}/v1/rerank`;
+      eleModelName.value = "bge-reranker-v2-m3";
+      eleQuestion.value = "苹果公司的产品有哪些？";
+      eleInput1.value =
         "Apple 是一家伟大的公司，他们的主要产品有 iPhone、iPad 和 Mac。";
-      input2.value =
+      eleInput2.value =
         "Microsoft 是一家伟大的公司，他们的主要产品有 Windows、Xbox 和 Surface。";
-      input3.value =
+      eleInput3.value =
         "OpenAI 是一家伟大的公司，他们的主要产品有 GPT-3、GPT-4o、GPT-5。";
 
-      visual.style.display = "block";
-      jsonData.style.display = "none";
+      eleVisual.style.display = "block";
+      eleJsonData.style.display = "none";
 
       if (
         "rerank_address" in localStorage &&
         localStorage.getItem("rerank_address").length > 0
       ) {
-        address.value = localStorage.getItem("rerank_address");
+        eleAddress.value = localStorage.getItem("rerank_address");
       }
       if (
         "rerank_key" in localStorage &&
         localStorage.getItem("rerank_key").length > 0
       ) {
-        key.value = localStorage.getItem("rerank_key");
+        eleKey.value = localStorage.getItem("rerank_key");
       }
 
       if (
         "rerank_modelName" in localStorage &&
         localStorage.getItem("rerank_modelName").length > 0
       ) {
-        modelName.value = localStorage.getItem("rerank_modelName");
+        eleModelName.value = localStorage.getItem("rerank_modelName");
       }
 
       if (
         "rerank_question" in localStorage &&
         localStorage.getItem("rerank_question").length > 0
       ) {
-        question.value = localStorage.getItem("rerank_question");
+        eleQuestion.value = localStorage.getItem("rerank_question");
       }
 
       if (
         "rerank_input1" in localStorage &&
         localStorage.getItem("rerank_input1").length > 0
       ) {
-        input1.value = localStorage.getItem("rerank_input1");
+        eleInput1.value = localStorage.getItem("rerank_input1");
       }
 
       if (
         "rerank_input2" in localStorage &&
         localStorage.getItem("rerank_input2").length > 0
       ) {
-        input2.value = localStorage.getItem("rerank_input2");
+        eleInput2.value = localStorage.getItem("rerank_input2");
       }
 
       if (
         "rerank_input3" in localStorage &&
         localStorage.getItem("rerank_input3").length > 0
       ) {
-        input3.value = localStorage.getItem("rerank_input3");
+        eleInput3.value = localStorage.getItem("rerank_input3");
       }
 
       if (
         "rerank_result" in localStorage &&
         localStorage.getItem("rerank_result").length > 0
       ) {
-        result.value = localStorage.getItem("rerank_result");
-        renderResult(JSON.parse(result.value));
+        eleResult.value = localStorage.getItem("rerank_result");
+        renderResult(JSON.parse(eleResult.value));
       }
 
-      tipAddress.style.display = "none";
-      tipModelName.style.display = "none";
-      tipQuestion.style.display = "none";
-      tipInput.style.display = "none";
+      eleTipAddress.style.display = "none";
+      eleTipModelName.style.display = "none";
+      eleTipQuestion.style.display = "none";
+      eleTipInput.style.display = "none";
 
-      send.addEventListener("click", () => {
-        if (address.value.length === 0) {
-          tipAddress.style.display = "block";
+      eleSend.addEventListener("click", () => {
+        if (eleAddress.value.length === 0) {
+          eleTipAddress.style.display = "block";
           return;
         }
 
-        if (modelName.value.length === 0) {
-          tipModelName.style.display = "block";
+        if (eleModelName.value.length === 0) {
+          eleTipModelName.style.display = "block";
           return;
         }
 
-        if (question.value.length === 0) {
-          tipQuestion.style.display = "block";
+        if (eleQuestion.value.length === 0) {
+          eleTipQuestion.style.display = "block";
           return;
         }
 
         if (
-          input1.value.length === 0 &&
-          input2.value.length === 0 &&
-          input3.value.length === 0
+          eleInput1.value.length === 0 &&
+          eleInput2.value.length === 0 &&
+          eleInput3.value.length === 0
         ) {
-          tipInput.style.display = "block";
+          eleTipInput.style.display = "block";
           return;
         }
 
         const documents = [];
-        if (input1.value.length > 0) {
-          documents.push(input1.value);
+        if (eleInput1.value.length > 0) {
+          documents.push(eleInput1.value);
         }
-        if (input2.value.length > 0) {
-          documents.push(input2.value);
+        if (eleInput2.value.length > 0) {
+          documents.push(eleInput2.value);
         }
-        if (input3.value.length > 0) {
-          documents.push(input3.value);
+        if (eleInput3.value.length > 0) {
+          documents.push(eleInput3.value);
         }
 
-        tipAddress.style.display = "none";
-        tipModelName.style.display = "none";
-        tipQuestion.style.display = "none";
-        tipInput.style.display = "none";
+        eleTipAddress.style.display = "none";
+        eleTipModelName.style.display = "none";
+        eleTipQuestion.style.display = "none";
+        eleTipInput.style.display = "none";
 
-        localStorage.setItem("rerank_address", address.value);
-        localStorage.setItem("rerank_key", key.value);
-        localStorage.setItem("rerank_modelName", modelName.value);
-        localStorage.setItem("rerank_question", question.value);
-        localStorage.setItem("rerank_input1", input1.value);
-        localStorage.setItem("rerank_input2", input2.value);
-        localStorage.setItem("rerank_input3", input3.value);
+        localStorage.setItem("rerank_address", eleAddress.value);
+        localStorage.setItem("rerank_key", eleKey.value);
+        localStorage.setItem("rerank_modelName", eleModelName.value);
+        localStorage.setItem("rerank_question", eleQuestion.value);
+        localStorage.setItem("rerank_input1", eleInput1.value);
+        localStorage.setItem("rerank_input2", eleInput2.value);
+        localStorage.setItem("rerank_input3", eleInput3.value);
 
-        fetch(address.value, {
+        fetch(eleAddress.value, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${key.value}`,
+            Authorization: `Bearer ${eleKey.value}`,
           },
           body: JSON.stringify({
-            model: modelName.value,
+            model: eleModelName.value,
             top_n: documents.length,
-            query: question.value,
+            query: eleQuestion.value,
             documents: documents,
           }),
         })
           .then((response) => response.json())
           .then((res_data) => {
-            result.value = JSON.stringify(res_data, null, 2);
+            eleResult.value = JSON.stringify(res_data, null, 2);
+            if (res_data.results == undefined) {
+              eleTabsJsonData.classList.add("is-active");
+              eleTabsVisual.classList.remove("is-active");
+              eleVisual.style.display = "none";
+              eleJsonData.style.display = "block";
+              return;
+            }
             renderResult(res_data);
-            localStorage.setItem("rerank_result", result.value);
+            localStorage.setItem("rerank_result", eleResult.value);
           })
           .catch((error) => console.error("Error:", error));
       });
 
-      tabsVisual.addEventListener("click", () => {
-        tabsVisual.classList.add("is-active");
-        tabsJsonData.classList.remove("is-active");
-        visual.style.display = "block";
-        jsonData.style.display = "none";
+      eleTabsVisual.addEventListener("click", () => {
+        eleTabsVisual.classList.add("is-active");
+        eleTabsJsonData.classList.remove("is-active");
+        eleVisual.style.display = "block";
+        eleJsonData.style.display = "none";
       });
 
-      tabsJsonData.addEventListener("click", () => {
-        tabsJsonData.classList.add("is-active");
-        tabsVisual.classList.remove("is-active");
-        visual.style.display = "none";
-        jsonData.style.display = "block";
+      eleTabsJsonData.addEventListener("click", () => {
+        eleTabsJsonData.classList.add("is-active");
+        eleTabsVisual.classList.remove("is-active");
+        eleVisual.style.display = "none";
+        eleJsonData.style.display = "block";
       });
 
       function renderResult(jsonData) {
-        resultList.innerHTML = "";
+        eleResultList.innerHTML = "";
         let newHtml = "";
         jsonData.results.forEach((item, index) => {
           const score = item.relevance_score;
@@ -406,7 +414,7 @@
               </div>
             `;
         });
-        resultList.innerHTML = newHtml;
+        eleResultList.innerHTML = newHtml;
       }
     </script>
   </body>
