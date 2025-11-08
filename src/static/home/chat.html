@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="shortcut icon" href="/static/redoc/favicon.png" />
+    <link rel="stylesheet" href="/static/home/bulma.min.css" />
+    <title>Chat</title>
+  </head>
+  <body>
+    <div class="container is-fluid">
+      <section class="hero is-warning">
+        <div class="hero-body">
+          <h1 class="title">对话补全 Chat</h1>
+          <h2 class="subtitle">对话补全接口，提供模型问答能力</h2>
+        </div>
+      </section>
+      <div class="columns is-desktop" style="margin-top: 20px">
+        <div class="column">
+          <div class="field">
+            <label class="label">模型地址：</label>
+            <div class="control">
+              <input
+                id="address"
+                class="input is-warning"
+                type="text"
+                placeholder="http://localhost:8000/v1/chat/completions"
+                autocomplete="off"
+              />
+            </div>
+          </div>
+          <div class="notification is-warning" id="tip-address">
+            请求地址不能为空
+          </div>
+
+          <div class="field">
+            <label class="label">模型秘钥：</label>
+            <div class="control">
+              <input
+                id="key"
+                class="input is-warning"
+                type="text"
+                placeholder="sk-123456"
+              />
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="label">模型名称：</label>
+            <div class="control">
+              <input
+                id="model-name"
+                class="input is-warning"
+                type="text"
+                placeholder="qwen-max"
+              />
+            </div>
+            <p class="help is-warning">
+              常见对话模型：qwen3,qwen3-vl,deepseek-r1,GPT-5,GPT-4o
+            </p>
+          </div>
+          <div class="notification is-warning" id="tip-model-name">
+            模型名称不能为空
+          </div>
+
+          <div class="field">
+            <label class="label">提问问题：</label>
+            <div class="control">
+              <textarea
+                id="question"
+                class="textarea is-warning"
+                rows="4"
+                placeholder="提问问题"
+              >
+苹果公司的产品有哪些？</textarea
+              >
+            </div>
+          </div>
+          <div class="notification is-warning" id="tip-question">
+            提问问题不能为空
+          </div>
+
+          <div class="control is-expanded">
+            <button id="send" class="button is-warning is-fullwidth">
+              发起请求
+            </button>
+          </div>
+        </div>
+        <div class="column">
+          <div>
+            <div class="field">
+              <label class="label">返回结果：</label>
+              <textarea
+                id="result"
+                class="textarea is-warning"
+                rows="20"
+                placeholder="输出结果"
+              ></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const eleAddress = document.querySelector("#address");
+      const eleKey = document.querySelector("#key");
+      const eleModelName = document.querySelector("#model-name");
+      const eleQuestion = document.querySelector("#question");
+      const eleSend = document.querySelector("#send");
+      const eleResult = document.querySelector("#result");
+      const eleTipAddress = document.querySelector("#tip-address");
+      const eleTipModelName = document.querySelector("#tip-model-name");
+      const eleTipQuestion = document.querySelector("#tip-question");
+      eleAddress.value = `${location.origin}/v1/chat/completions`;
+      eleModelName.value = "qwen3";
+      eleQuestion.value = "苹果公司的产品有哪些？";
+
+      if (
+        "chat_address" in localStorage &&
+        localStorage.getItem("chat_address").length > 0
+      ) {
+        eleAddress.value = localStorage.getItem("chat_address");
+      }
+      if (
+        "chat_key" in localStorage &&
+        localStorage.getItem("chat_key").length > 0
+      ) {
+        eleKey.value = localStorage.getItem("chat_key");
+      }
+
+      if (
+        "chat_modelName" in localStorage &&
+        localStorage.getItem("chat_modelName").length > 0
+      ) {
+        eleModelName.value = localStorage.getItem("chat_modelName");
+      }
+
+      if (
+        "chat_question" in localStorage &&
+        localStorage.getItem("chat_question").length > 0
+      ) {
+        eleQuestion.value = localStorage.getItem("chat_question");
+      }
+
+      if (
+        "chat_result" in localStorage &&
+        localStorage.getItem("chat_result").length > 0
+      ) {
+        eleResult.value = localStorage.getItem("chat_result");
+      }
+
+      eleTipAddress.style.display = "none";
+      eleTipModelName.style.display = "none";
+      eleTipQuestion.style.display = "none";
+
+      eleSend.addEventListener("click", () => {
+        if (eleAddress.value.length === 0) {
+          eleTipAddress.style.display = "block";
+          return;
+        }
+
+        if (eleModelName.value.length === 0) {
+          eleTipModelName.style.display = "block";
+          return;
+        }
+
+        if (eleQuestion.value.length === 0) {
+          eleTipQuestion.style.display = "block";
+          return;
+        }
+
+        eleTipAddress.style.display = "none";
+        eleTipModelName.style.display = "none";
+        eleTipQuestion.style.display = "none";
+
+        localStorage.setItem("chat_address", eleAddress.value);
+        localStorage.setItem("chat_key", eleKey.value);
+        localStorage.setItem("chat_modelName", eleModelName.value);
+        localStorage.setItem("chat_question", eleQuestion.value);
+
+        fetch(eleAddress.value, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${eleKey.value}`,
+          },
+          body: JSON.stringify({
+            model: eleModelName.value,
+            top_n: documents.length,
+            query: eleQuestion.value,
+            documents: documents,
+          }),
+        })
+          .then((response) => response.json())
+          .then((res_data) => {
+            eleResult.value = JSON.stringify(res_data, null, 2);
+            if (res_data.results == undefined) {
+              return;
+            }
+            localStorage.setItem("chat_result", eleResult.value);
+          })
+          .catch((error) => console.error("Error:", error));
+      });
+    </script>
+  </body>
+</html>
