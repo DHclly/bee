@@ -113,6 +113,8 @@
                 class="textarea is-warning"
                 rows="4"
                 placeholder="提问问题"
+                spellcheck="false"
+                autocomplete="off"
               >
 苹果公司的产品有哪些？</textarea
               >
@@ -136,6 +138,8 @@
               class="textarea is-warning"
               rows="10"
               placeholder="输出结果"
+              spellcheck="false"
+              autocomplete="off"
             ></textarea>
           </div>
           <div class="field">
@@ -145,6 +149,8 @@
               class="textarea is-warning"
               rows="10"
               placeholder="输出结果"
+              spellcheck="false"
+              autocomplete="off"
             ></textarea>
           </div>
         </div>
@@ -167,7 +173,7 @@
         'input[name="describe-img"]'
       );
 
-      const eleTestImg = document.querySelector(".test-img img");
+      const eleTestImg = document.querySelector(".test-img");
 
       eleAddress.value = `${location.origin}/v1/chat/completions`;
       eleModelName.value = "qwen3";
@@ -201,11 +207,17 @@
       }
 
       if (
-        "chat_result" in localStorage &&
-        localStorage.getItem("chat_result").length > 0
+        "chat_result_json" in localStorage &&
+        localStorage.getItem("chat_result_json").length > 0
       ) {
-        eleResultJson.value = localStorage.getItem("chat_result");
-        renderNoStreamMessage(JSON.parse(eleResultJson.value));
+        eleResultJson.value = localStorage.getItem("chat_result_json");
+      }
+
+      if (
+        "chat_result_text" in localStorage &&
+        localStorage.getItem("chat_result_text").length > 0
+      ) {
+        eleResultText.value = localStorage.getItem("chat_result_text");
       }
 
       eleTestImg.style.display = "none";
@@ -220,6 +232,7 @@
             eleQuestion.value = "描述一下图片内容";
           } else {
             eleTestImg.style.display = "none";
+            eleQuestion.value = "mac 是苹果公司的产品么？";
           }
         });
       });
@@ -298,13 +311,100 @@
         if (isStream) {
           eleResultJson.value = "";
           eleResultText.value = "";
+
+          let isScrollScheduled = false;
+          function scheduleScroll(element) {
+            if (!isScrollScheduled) {
+              isScrollScheduled = true;
+              requestAnimationFrame(() => {
+                element.scrollTop = element.scrollHeight;
+                isScrollScheduled = false;
+              });
+            }
+          }
+
+          let isScrollScheduled2 = false;
+          function scheduleScroll2(element) {
+            if (!isScrollScheduled2) {
+              isScrollScheduled2 = true;
+              requestAnimationFrame(() => {
+                element.scrollTop = element.scrollHeight;
+                isScrollScheduled2 = false;
+              });
+            }
+          }
+
           req1
             .then((response) => {
               if (!response.ok) {
-                const errorText = response.text();
-                throw new Error(`HTTP ${response.status}: ${errorText}`);
+                return response.text().then(function (text) {
+                  eleResultJson.value = "HTTP " + response.status + ": " + text;
+                  return;
+                });
               }
-              
+
+              if (!response.body) {
+                eleResultJson.value =
+                  "ReadableStream not supported in this browser";
+                return;
+              }
+
+              const reader = response.body.getReader();
+              const decoder = new TextDecoder("utf-8");
+              let buffer = "";
+
+              function readLine() {
+                return reader.read().then(function (result) {
+                  if (result.done) {
+                    return;
+                  }
+
+                  buffer += decoder.decode(result.value, { stream: true });
+
+                  // 按行分割处理
+                  const lines = buffer.split("\n");
+                  buffer = lines.pop() || ""; // 保留未完成的最后一行
+
+                  for (var i = 0; i < lines.length; i++) {
+                    var line = lines[i].trim();
+                    eleResultJson.value += line + "\n";
+                    scheduleScroll(eleResultJson);
+
+                    if (line.startsWith("data: ")) {
+                      var dataStr = line.slice(6).trim();
+
+                      if (dataStr === "[DONE]") {
+                        localStorage.setItem("chat_result_json", eleResultJson.value);
+                        localStorage.setItem("chat_result_text", eleResultText.value);
+                        return;
+                      }
+
+                      try {
+                        var chunk = JSON.parse(dataStr);
+
+                        if(chunk.choices == undefined){
+                            return;
+                        }
+
+                        if (chunk.choices[0].delta.reasoning_content != null) {
+                          eleResultText.value +=
+                            chunk.choices[0].delta.reasoning_content;
+                        } else {
+                          eleResultText.value += chunk.choices[0].delta.content;
+                        }
+                        scheduleScroll2(eleResultText);
+                      } catch (e) {
+                        console.warn("Failed to parse SSE data:", dataStr, e);
+                      }
+                    }
+                  }
+
+                  // 继续读取下一块
+                  readLine();
+                });
+              }
+
+              readLine();
             })
             .catch((error) => console.error("Error:", error));
         } else {
@@ -316,16 +416,14 @@
                 return;
               }
 
-              localStorage.setItem("chat_result", eleResultJson.value);
-              renderNoStreamMessage(resData);
+              localStorage.setItem("chat_result_json", eleResultJson.value);
+
+              eleResultText.value = resData.choices[0].message.content;
+              localStorage.setItem("chat_result_text", eleResultText.value);
             })
             .catch((error) => console.error("Error:", error));
         }
       });
-
-      function renderNoStreamMessage(resData) {
-        eleResultText.value = resData.choices[0].message.content;
-      }
     </script>
   </body>
 </html>
