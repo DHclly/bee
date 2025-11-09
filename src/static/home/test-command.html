@@ -17,8 +17,8 @@
     <div class="container">
       <div class="content">
         <h3>测试命令参考</h3>
-        <h4>01问答对话大模型</h4>
-        <p>发起请求：</p>
+        <h4>01问答对话大模型(Chat Completions)</h4>
+        <h5>发起请求：</h5>
         <pre class="code"><code>curl http://localhost:80/v1/chat/completions \
 -H "Content-Type: application/json" \
 -H "Authorization: Bearer sk_123" \
@@ -39,10 +39,57 @@
         }
     ]
 }'</code></pre>
-        <p>返回结果：</p>
-        <pre class="code"><code></code></pre>
-        <h4>02向量模型</h4>
-        <p>发起请求：</p>
+        <h5>返回结果(stream=true)：</h5>
+        <pre
+          class="code"
+        ><code>data: {"id":"chatcmpl-vVIoBsot2UKLBst6Rnufj1xBDqfS0Ydd","object":"chat.completion.chunk","created":1762672789,"model":"qwen2.5-7b-instruct","choices":[{"finish_reason":null,"index":0,"delta":{"role":null,"content":"北京","reasoning_content":null}}],"usage":null}
+
+data: {"id":"chatcmpl-vVIoBsot2UKLBst6Rnufj1xBDqfS0Ydd","object":"chat.completion.chunk","created":1762672789,"model":"qwen2.5-7b-instruct","choices":[{"finish_reason":null,"index":0,"delta":{"role":null,"content":"上海","reasoning_content":null}}],"usage":null}
+
+data: {"id":"chatcmpl-vVIoBsot2UKLBst6Rnufj1xBDqfS0Ydd","object":"chat.completion.chunk","created":1762672789,"model":"qwen2.5-7b-instruct","choices":[{"finish_reason":null,"index":0,"delta":{"role":null,"content":"广州","reasoning_content":null}}],"usage":null}
+
+data: {"id":"chatcmpl-vVIoBsot2UKLBst6Rnufj1xBDqfS0Ydd","object":"chat.completion.chunk","created":1762672789,"model":"qwen2.5-7b-instruct","choices":[{"finish_reason":"stop","index":0,"delta":{"role":null,"content":"","reasoning_content":null}}],"usage":{"prompt_tokens":18,"completion_tokens":4,"total_tokens":22,"prompt_tokens_details":{"cached_tokens":2},"completion_tokens_details":{"accepted_prediction_tokens":0,"rejected_prediction_tokens":0,"reasoning_tokens":0},"draft_tokens":0,"draft_tokens_acceptance":0.0,"prompt_tokens_per_second":117.50651181919665,"time_per_output_token_ms":40.26925,"time_to_first_token_ms":153.183,"tokens_per_second":24.832843919367757}}
+
+        </code></pre>
+        <h5>返回结果(stream=false)：</h5>
+        <pre class="code"><code>{
+  "id": "chatcmpl-zmNnnJaROfrt2biyySTcGDnPazs4AvY5",
+  "object": "chat.completion",
+  "created": 1762672897,
+  "model": "qwen2.5-7b-instruct",
+  "choices": [
+    {
+      "finish_reason": "stop",
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "北：北京市，上：上海市，广：广州市",
+        "reasoning_content": null
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 18,
+    "completion_tokens": 12,
+    "total_tokens": 30,
+    "prompt_tokens_details": {
+      "cached_tokens": 17
+    },
+    "completion_tokens_details": {
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0,
+      "reasoning_tokens": 0
+    },
+    "draft_tokens": 0,
+    "draft_tokens_acceptance": 0,
+    "prompt_tokens_per_second": 196.1852861035422,
+    "time_per_output_token_ms": 33.235416666666666,
+    "time_to_first_token_ms": 91.75,
+    "tokens_per_second": 30.088384629850182
+  }
+}</code></pre>
+        <h4>02向量模型(Embeddings)</h4>
+        <h5>发起请求：</h5>
         <pre class="code"><code>curl http://localhost:80/v1/embeddings \
 -H "Content-Type: application/json" \
 -H "Authorization: Bearer sk_123" \
@@ -54,12 +101,12 @@
     "OpenAI 是一家伟大的公司，他们的主要产品有 GPT-3、GPT-4o、GPT-5。"
   ]
 }'</code></pre>
-        <p>返回结果：</p>
+        <h5>返回结果：</h5>
         <pre class="code"><code>{
   "id": "embd-6f71f64e88d34788b22e5fe9f491a882",
   "object": "list",
   "created": 1762506287,
-  "model": "bge-base-zh-v1.5",
+  "model": "bge-m3",
   "data": [
     {
       "index": 0,
@@ -105,8 +152,8 @@
     "prompt_tokens_details": null
   }
 }</code></pre>
-        <h4>03重排模型</h4>
-        <p>发起请求：</p>
+        <h4>03重排模型(Rerank)</h4>
+        <h5>发起请求：</h5>
         <pre class="code"><code>curl http://localhost:80/v1/rerank \
 -H "Content-Type: application/json" \
 -H "Authorization: Bearer sk_123" \
@@ -120,7 +167,7 @@
     "OpenAI 是一家伟大的公司，他们的主要产品有 GPT-3。"
   ]
 }'</code></pre>
-        <p>返回结果：</p>
+        <h5>返回结果：</h5>
         <pre class="code"><code>{
   "id": "rerank-ea0d3aefc89149ad8919b623c48f16e1",
   "model": "bge-reranker-v2-m3",
@@ -152,6 +199,7 @@
   ]
 }</code></pre>
         <h4>04多模态大模型</h4>
+        <h5>发起请求：</h5>
         <pre class="code"><code>curl http://localhost:80/v1/chat/completions \
 -H "Content-Type: application/json" \
 -H "Authorization: Bearer sk_123" \
@@ -176,9 +224,77 @@
     }
   ]
 }'</code></pre>
+        <h5>返回结果(stream=true)：</h5>
+        <pre
+          class="code"
+        ><code>data: {"id":"chatcmpl-oiMi1ZvFdhRCbSaIHm8bFphwFW7mVUK3","object":"chat.completion.chunk","created":1762673316,"model":"qwen2-vl-7b-instruct","choices":[{"finish_reason":null,"index":0,"delta":{"role":null,"content":"图片","reasoning_content":null}}],"usage":null}
+
+data: {"id":"chatcmpl-oiMi1ZvFdhRCbSaIHm8bFphwFW7mVUK3","object":"chat.completion.chunk","created":1762673316,"model":"qwen2-vl-7b-instruct","choices":[{"finish_reason":null,"index":0,"delta":{"role":null,"content":"中的","reasoning_content":null}}],"usage":null}
+
+data: {"id":"chatcmpl-oiMi1ZvFdhRCbSaIHm8bFphwFW7mVUK3","object":"chat.completion.chunk","created":1762673316,"model":"qwen2-vl-7b-instruct","choices":[{"finish_reason":null,"index":0,"delta":{"role":null,"content":"内容","reasoning_content":null}}],"usage":null}
+
+data: {"id":"chatcmpl-oiMi1ZvFdhRCbSaIHm8bFphwFW7mVUK3","object":"chat.completion.chunk","created":1762673316,"model":"qwen2-vl-7b-instruct","choices":[{"finish_reason":null,"index":0,"delta":{"role":null,"content":"是","reasoning_content":null}}],"usage":null}
+
+data: {"id":"chatcmpl-oiMi1ZvFdhRCbSaIHm8bFphwFW7mVUK3","object":"chat.completion.chunk","created":1762673316,"model":"qwen2-vl-7b-instruct","choices":[{"finish_reason":null,"index":0,"delta":{"role":null,"content":" \"","reasoning_content":null}}],"usage":null}
+
+data: {"id":"chatcmpl-oiMi1ZvFdhRCbSaIHm8bFphwFW7mVUK3","object":"chat.completion.chunk","created":1762673316,"model":"qwen2-vl-7b-instruct","choices":[{"finish_reason":null,"index":0,"delta":{"role":null,"content":"1","reasoning_content":null}}],"usage":null}
+
+data: {"id":"chatcmpl-oiMi1ZvFdhRCbSaIHm8bFphwFW7mVUK3","object":"chat.completion.chunk","created":1762673316,"model":"qwen2-vl-7b-instruct","choices":[{"finish_reason":null,"index":0,"delta":{"role":null,"content":"2","reasoning_content":null}}],"usage":null}
+
+data: {"id":"chatcmpl-oiMi1ZvFdhRCbSaIHm8bFphwFW7mVUK3","object":"chat.completion.chunk","created":1762673316,"model":"qwen2-vl-7b-instruct","choices":[{"finish_reason":null,"index":0,"delta":{"role":null,"content":"3","reasoning_content":null}}],"usage":null}
+
+data: {"id":"chatcmpl-oiMi1ZvFdhRCbSaIHm8bFphwFW7mVUK3","object":"chat.completion.chunk","created":1762673316,"model":"qwen2-vl-7b-instruct","choices":[{"finish_reason":null,"index":0,"delta":{"role":null,"content":"\"","reasoning_content":null}}],"usage":null}
+
+data: {"id":"chatcmpl-oiMi1ZvFdhRCbSaIHm8bFphwFW7mVUK3","object":"chat.completion.chunk","created":1762673316,"model":"qwen2-vl-7b-instruct","choices":[{"finish_reason":null,"index":0,"delta":{"role":null,"content":"。","reasoning_content":null}}],"usage":null}
+
+data: {"id":"chatcmpl-oiMi1ZvFdhRCbSaIHm8bFphwFW7mVUK3","object":"chat.completion.chunk","created":1762673316,"model":"qwen2-vl-7b-instruct","choices":[{"finish_reason":"stop","index":0,"delta":{"role":null,"content":"","reasoning_content":null}}],"usage":{"prompt_tokens":18,"completion_tokens":11,"total_tokens":29,"prompt_tokens_details":{"cached_tokens":11},"completion_tokens_details":{"accepted_prediction_tokens":0,"rejected_prediction_tokens":0,"reasoning_tokens":0},"draft_tokens":0,"draft_tokens_acceptance":0.0,"prompt_tokens_per_second":150.1451403022922,"time_per_output_token_ms":28.39090909090909,"time_to_first_token_ms":119.884,"tokens_per_second":35.22254242715338}}
+</code></pre>
+        <h5>返回结果(stream=false)：</h5>
+        <pre class="code"><code>{
+  "id": "chatcmpl-j69tbXr8gegx7sZ8IxucZpSscghARAIs",
+  "object": "chat.completion",
+  "created": 1762673213,
+  "model": "qwen2-vl-7b-instruct",
+  "choices": [
+    {
+      "finish_reason": "stop",
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "图片显示了一个数字123。",
+        "reasoning_content": null
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 16,
+    "completion_tokens": 9,
+    "total_tokens": 25,
+    "prompt_tokens_details": {
+      "cached_tokens": 15
+    },
+    "completion_tokens_details": {
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0,
+      "reasoning_tokens": 0
+    },
+    "draft_tokens": 0,
+    "draft_tokens_acceptance": 0,
+    "prompt_tokens_per_second": 206.16431295742706,
+    "time_per_output_token_ms": 25.369444444444444,
+    "time_to_first_token_ms": 77.608,
+    "tokens_per_second": 39.4174969889412
+  }
+}</code></pre>
         <h4>05OCR文字识别</h4>
+        <h5>发起请求：</h5>
+        <pre class="code"><code></code></pre>
+        <h5>返回结果：</h5>
         <pre class="code"><code></code></pre>
         <h4>06ASR语音识别</h4>
+        <h5>发起请求：</h5>
+        <pre class="code"><code></code></pre>
+        <h5>返回结果：</h5>
         <pre class="code"><code></code></pre>
       </div>
       <div></div>
