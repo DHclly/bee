@@ -7,7 +7,7 @@ from services.log_service import logger
 from services.module_load_service import load_chat_api
 from services.sse_service import get_sse_message
 
-from .models.chat_args import ChatArgs as BeeChatArgs
+from .models.chat_args import ChatArgs as BeeChatArgs,ChatStreamOptionsModel as BeeChatStreamOptionsModel
 from .models.chat_result import ChatResult as BeeChatResult
 from .models.error_result import APIErrorResult
 
@@ -90,6 +90,8 @@ async def chat(args:BeeChatArgs,token: str)->BeeChatResult | StreamingResponse |
 
 
 def pre_process_args(args:BeeChatArgs)->BeeChatArgs:
+    if args.stream:
+        args.stream_options=BeeChatStreamOptionsModel(include_usage=True)
     return args
 
 
