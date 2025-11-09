@@ -17,7 +17,7 @@ def get_chat_url():
     return os.getenv('bee_chat_url', 'http://localhost')
 
 def get_provider_type():
-    return os.getenv('bee_provider_type', 'default')
+    return os.getenv('bee_provider_type', 'gpustack')
 
 def get_show_swagger():
     return os.getenv('bee_show_swagger', 'true')
