@@ -179,6 +179,11 @@
       eleModelName.value = "qwen3";
       eleQuestion.value = "苹果公司的产品有哪些？";
 
+      eleTestImg.style.display = "none";
+      eleTipAddress.style.display = "none";
+      eleTipModelName.style.display = "none";
+      eleTipQuestion.style.display = "none";
+
       if (
         "chat_address" in localStorage &&
         localStorage.getItem("chat_address").length > 0
@@ -203,15 +208,8 @@
         "chat_is_stream" in localStorage &&
         localStorage.getItem("chat_is_stream").length > 0
       ) {
-        eleModelName.value = localStorage.getItem("chat_is_stream");
-      }
-
-      if (
-        "chat_is_stream" in localStorage &&
-        localStorage.getItem("chat_modelName").length > 0
-      ) {
         eleStream.forEach((item) => {
-          if (item.value == localStorage.getItem("chat_modelName")) {
+          if (item.value == localStorage.getItem("chat_is_stream")) {
             item.checked = true;
           }
         });
@@ -224,6 +222,13 @@
         eleDescribeImg.forEach((item) => {
           if (item.value == localStorage.getItem("chat_describe_img")) {
             item.checked = true;
+            if (item.value == "yes") {
+              eleTestImg.style.display = "block";
+              eleQuestion.value = "描述一下图片";
+            } else {
+              eleTestImg.style.display = "none";
+              eleQuestion.value = "mac 是苹果公司的产品么？";
+            }
           }
         });
       }
@@ -242,16 +247,11 @@
         eleResultText.value = localStorage.getItem("chat_result_text");
       }
 
-      eleTestImg.style.display = "none";
-      eleTipAddress.style.display = "none";
-      eleTipModelName.style.display = "none";
-      eleTipQuestion.style.display = "none";
-
       eleDescribeImg.forEach((item) => {
         item.addEventListener("click", () => {
           if (item.value == "yes") {
             eleTestImg.style.display = "block";
-            eleQuestion.value = "描述一下图片内容";
+            eleQuestion.value = "描述一下图片";
           } else {
             eleTestImg.style.display = "none";
             eleQuestion.value = "mac 是苹果公司的产品么？";
@@ -305,7 +305,7 @@
           content.push({
             type: "image_url",
             image_url: {
-              url: eleTestImg.src,
+              url: eleTestImg.querySelector("img").src,
             },
           });
         }
