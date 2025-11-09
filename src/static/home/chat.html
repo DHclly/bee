@@ -200,10 +200,32 @@
       }
 
       if (
-        "chat_question" in localStorage &&
-        localStorage.getItem("chat_question").length > 0
+        "chat_is_stream" in localStorage &&
+        localStorage.getItem("chat_is_stream").length > 0
       ) {
-        eleQuestion.value = localStorage.getItem("chat_question");
+        eleModelName.value = localStorage.getItem("chat_is_stream");
+      }
+
+      if (
+        "chat_is_stream" in localStorage &&
+        localStorage.getItem("chat_modelName").length > 0
+      ) {
+        eleStream.forEach((item) => {
+          if (item.value == localStorage.getItem("chat_modelName")) {
+            item.checked = true;
+          }
+        });
+      }
+
+      if (
+        "chat_describe_img" in localStorage &&
+        localStorage.getItem("chat_describe_img").length > 0
+      ) {
+        eleDescribeImg.forEach((item) => {
+          if (item.value == localStorage.getItem("chat_describe_img")) {
+            item.checked = true;
+          }
+        });
       }
 
       if (
@@ -267,12 +289,14 @@
         eleStream.forEach((item) => {
           if (item.checked) {
             isStream = item.value == "yes";
+            localStorage.setItem("chat_is_stream", item.value);
           }
         });
 
         eleDescribeImg.forEach((item) => {
           if (item.checked) {
             isDescribeImg = item.value == "yes";
+            localStorage.setItem("chat_describe_img", item.value);
           }
         });
 
@@ -374,16 +398,22 @@
                       var dataStr = line.slice(6).trim();
 
                       if (dataStr === "[DONE]") {
-                        localStorage.setItem("chat_result_json", eleResultJson.value);
-                        localStorage.setItem("chat_result_text", eleResultText.value);
+                        localStorage.setItem(
+                          "chat_result_json",
+                          eleResultJson.value
+                        );
+                        localStorage.setItem(
+                          "chat_result_text",
+                          eleResultText.value
+                        );
                         return;
                       }
 
                       try {
                         var chunk = JSON.parse(dataStr);
 
-                        if(chunk.choices == undefined){
-                            return;
+                        if (chunk.choices == undefined) {
+                          return;
                         }
 
                         if (chunk.choices[0].delta.reasoning_content != null) {
