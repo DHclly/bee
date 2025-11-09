@@ -380,6 +380,14 @@
               function readLine() {
                 return reader.read().then(function (result) {
                   if (result.done) {
+                    localStorage.setItem(
+                      "chat_result_json",
+                      eleResultJson.value
+                    );
+                    localStorage.setItem(
+                      "chat_result_text",
+                      eleResultText.value
+                    );
                     return;
                   }
 
