@@ -212,36 +212,13 @@
             // 加载输入框数据
             const savedInputs = localStorage.getItem(storageKeys.inputs);
             if (savedInputs) {
-              try {
-                const parsedInputs = JSON.parse(savedInputs);
-                // 清空现有输入框
-                inputs.length = 0;
-                // 添加保存的输入框数据
-                parsedInputs.forEach((input) => {
-                  inputs.push(input);
-                });
-              } catch (e) {
-                console.error("解析输入框数据失败:", e);
-                // 如果解析失败，使用默认值
-                inputs.length = 0;
-                inputs.push(
-                  {
-                    value:
-                      "Apple 是一家伟大的公司，他们的主要产品有 iPhone、iPad 和 Mac。",
-                    placeholder: "请输入文本",
-                  },
-                  {
-                    value:
-                      "Microsoft 是一家伟大的公司，他们的主要产品有 Windows、Xbox 和 Surface。",
-                    placeholder: "请输入文本",
-                  },
-                  {
-                    value:
-                      "OpenAI 是一家伟大的公司，他们的主要产品有 GPT-3、GPT-4o、GPT-5。",
-                    placeholder: "请输入文本",
-                  }
-                );
-              }
+              const parsedInputs = JSON.parse(savedInputs);
+              // 清空现有输入框
+              inputs.length = 0;
+              // 添加保存的输入框数据
+              parsedInputs.forEach((input) => {
+                inputs.push(input);
+              });
             } else {
               // 如果没有保存的数据，使用默认值
               inputs.length = 0;
