@@ -14,6 +14,11 @@
         color: var(--bulma-link);
         font-weight: bold;
       }
+      
+      .column-title {
+        font-size: 26px;
+        font-weight: bold;
+      }
     </style>
     <title>Rerank</title>
   </head>
@@ -29,11 +34,12 @@
       </section>
       <div class="columns is-desktop" style="margin-top: 20px">
         <div class="column">
+          <h2 class="column-title">请求参数：</h2>
           <div class="field">
             <label class="label">模型地址：</label>
             <div class="control">
               <input
-                id="address"
+                v-model="address"
                 class="input is-warning"
                 type="text"
                 placeholder="http://localhost:8000/v1/rerank"
@@ -41,7 +47,7 @@
               />
             </div>
           </div>
-          <div class="notification is-warning" id="tip-address">
+          <div class="notification is-warning" v-show="showAddressTip">
             请求地址不能为空
           </div>
 
@@ -49,7 +55,7 @@
             <label class="label">模型秘钥：</label>
             <div class="control">
               <input
-                id="key"
+                v-model="key"
                 class="input is-warning"
                 type="text"
                 placeholder="sk-123456"
@@ -61,7 +67,7 @@
             <label class="label">模型名称：</label>
             <div class="control">
               <input
-                id="model-name"
+                v-model="modelName"
                 class="input is-warning"
                 type="text"
                 placeholder="bge-reranker-v2-m3"
@@ -69,7 +75,7 @@
             </div>
             <p class="help is-warning">常见向量模型：bge-reranker-v2-m3</p>
           </div>
-          <div class="notification is-warning" id="tip-model-name">
+          <div class="notification is-warning" v-show="showModelNameTip">
             模型名称不能为空
           </div>
 
@@ -77,14 +83,14 @@
             <label class="label">提问问题：</label>
             <div class="control">
               <input
-                id="question"
+                v-model="question"
                 class="input is-warning"
                 type="text"
                 placeholder="苹果公司的产品有哪些？"
               />
             </div>
           </div>
-          <div class="notification is-warning" id="tip-question">
+          <div class="notification is-warning" v-show="showQuestionTip">
             提问问题不能为空
           </div>
 
@@ -98,7 +104,7 @@
             </p>
             <div class="control is-expanded">
               <input
-                id="input-1"
+                v-model="input1"
                 class="input is-warning"
                 type="text"
                 placeholder="Apple 是一家伟大的公司，他们的主要产品有 iPhone、iPad 和 Mac。"
@@ -112,7 +118,7 @@
             </p>
             <div class="control is-expanded">
               <input
-                id="input-2"
+                v-model="input2"
                 class="input is-warning"
                 type="text"
                 placeholder="Microsoft 是一家伟大的公司，他们的主要产品有 Windows、Xbox 和 Surface。"
@@ -126,296 +132,284 @@
             </p>
             <div class="control is-expanded">
               <input
-                id="input-3"
+                v-model="input3"
                 class="input is-warning"
                 type="text"
                 placeholder="OpenAI 是一家伟大的公司，他们的主要产品有 GPT-3、GPT-4o、GPT-5。"
               />
             </div>
           </div>
-          <div class="notification is-warning" id="tip-input">
+          <div class="notification is-warning" v-show="showInputTip">
             至少要有一行重排文本
           </div>
           <div class="control is-expanded">
-            <button id="send" class="button is-warning is-fullwidth">
+            <button
+              @click="sendRequest"
+              class="button is-warning is-fullwidth"
+              :disabled="loading"
+              :class="{ 'is-loading': loading }"
+            >
               发起请求
             </button>
           </div>
         </div>
         <div class="column">
+          <h2 class="column-title">返回结果：</h2>
           <div class="tabs tabs-result is-centered is-boxed is-warning">
             <ul>
-              <li class="is-active">
+              <li :class="{ 'is-active': activeTab === 'visual' }" @click="switchTab('visual')">
                 <a>
                   <span>可视化</span>
                 </a>
               </li>
-              <li>
+              <li :class="{ 'is-active': activeTab === 'json' }" @click="switchTab('json')">
                 <a>
                   <span>JSON 数据</span>
                 </a>
               </li>
             </ul>
           </div>
-          <div id="json-data">
+          <div v-show="activeTab === 'json'">
             <div class="field">
               <label class="label">返回结果：</label>
               <textarea
-                id="result"
+                v-model="result"
                 class="textarea is-warning"
                 rows="20"
                 placeholder="输出结果"
               ></textarea>
             </div>
           </div>
-          <div id="visual" class="visual">
+          <div v-show="activeTab === 'visual'" class="visual">
             <div class="field">
               <label class="label">返回结果：</label>
             </div>
-            <div class="result-list" id="result-list"></div>
+            <div class="result-list">
+              <div v-for="(item, index) in rerankResults" :key="index" class="result-item">
+                <div v-if="index > 0"><hr/></div>
+                <div class="field has-addons">
+                  <p class="control">
+                    <a class="button is-static"> {{ index + 1 }}. </a>
+                  </p>
+                  <div class="control is-expanded">
+                    <input
+                      class="input is-warning"
+                      type="text"
+                      :value="item.document.text"
+                      readonly
+                    />
+                  </div>
+                </div>
+                <div class="field">
+                  <progress class="progress is-warning" :value="getScorePercent(item.relevance_score)" min="1" max="100">
+                    {{ getScorePercent(item.relevance_score) }}%
+                  </progress>
+                </div>
+                <div class="field" style="margin-bottom: 12px;">
+                  <span class="tag is-warning is-light">
+                    分数：<span class="score">{{ item.relevance_score.toFixed(5) }}</span>
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
     <script src="/static/home/vue3.global.prod.js"></script>
     <script>
-      const eleAddress = document.querySelector("#address");
-      const eleKey = document.querySelector("#key");
-      const eleModelName = document.querySelector("#model-name");
-      const eleQuestion = document.querySelector("#question");
-      const eleInput1 = document.querySelector("#input-1");
-      const eleInput2 = document.querySelector("#input-2");
-      const eleInput3 = document.querySelector("#input-3");
-      const eleSend = document.querySelector("#send");
-      const eleResult = document.querySelector("#result");
-      const eleTipAddress = document.querySelector("#tip-address");
-      const eleTipModelName = document.querySelector("#tip-model-name");
-      const eleTipQuestion = document.querySelector("#tip-question");
-      const eleTipInput = document.querySelector("#tip-input");
-      const eleJsonData = document.querySelector("#json-data");
-      const eleVisual = document.querySelector("#visual");
-      const eleTabsVisual = document.querySelector(
-        ".tabs-result li:nth-child(1)"
-      );
-      const eleTabsJsonData = document.querySelector(
-        ".tabs-result li:nth-child(2)"
-      );
-      const eleResultList = document.querySelector("#result-list");
-
-      eleAddress.value = `${location.origin}/v1/rerank`;
-      eleModelName.value = "bge-reranker-v2-m3";
-      eleQuestion.value = "苹果公司的产品有哪些？";
-      eleInput1.value =
-        "Apple 是一家伟大的公司，他们的主要产品有 iPhone、iPad 和 Mac。";
-      eleInput2.value =
-        "Microsoft 是一家伟大的公司，他们的主要产品有 Windows、Xbox 和 Surface。";
-      eleInput3.value =
-        "OpenAI 是一家伟大的公司，他们的主要产品有 GPT-3、GPT-4o、GPT-5。";
-
-      eleVisual.style.display = "block";
-      eleJsonData.style.display = "none";
-
-      if (
-        "rerank_address" in localStorage &&
-        localStorage.getItem("rerank_address").length > 0
-      ) {
-        eleAddress.value = localStorage.getItem("rerank_address");
-      }
-      if (
-        "rerank_key" in localStorage &&
-        localStorage.getItem("rerank_key").length > 0
-      ) {
-        eleKey.value = localStorage.getItem("rerank_key");
-      }
-
-      if (
-        "rerank_modelName" in localStorage &&
-        localStorage.getItem("rerank_modelName").length > 0
-      ) {
-        eleModelName.value = localStorage.getItem("rerank_modelName");
-      }
-
-      if (
-        "rerank_question" in localStorage &&
-        localStorage.getItem("rerank_question").length > 0
-      ) {
-        eleQuestion.value = localStorage.getItem("rerank_question");
-      }
-
-      if (
-        "rerank_input1" in localStorage &&
-        localStorage.getItem("rerank_input1").length > 0
-      ) {
-        eleInput1.value = localStorage.getItem("rerank_input1");
-      }
-
-      if (
-        "rerank_input2" in localStorage &&
-        localStorage.getItem("rerank_input2").length > 0
-      ) {
-        eleInput2.value = localStorage.getItem("rerank_input2");
-      }
-
-      if (
-        "rerank_input3" in localStorage &&
-        localStorage.getItem("rerank_input3").length > 0
-      ) {
-        eleInput3.value = localStorage.getItem("rerank_input3");
-      }
-
-      if (
-        "rerank_result" in localStorage &&
-        localStorage.getItem("rerank_result").length > 0
-      ) {
-        eleResult.value = localStorage.getItem("rerank_result");
-        renderResult(JSON.parse(eleResult.value));
-      }
-
-      eleTipAddress.style.display = "none";
-      eleTipModelName.style.display = "none";
-      eleTipQuestion.style.display = "none";
-      eleTipInput.style.display = "none";
-
-      eleSend.addEventListener("click", () => {
-        if (eleAddress.value.length === 0) {
-          eleTipAddress.style.display = "block";
-          return;
-        }
-
-        if (eleModelName.value.length === 0) {
-          eleTipModelName.style.display = "block";
-          return;
-        }
-
-        if (eleQuestion.value.length === 0) {
-          eleTipQuestion.style.display = "block";
-          return;
-        }
-
-        if (
-          eleInput1.value.length === 0 &&
-          eleInput2.value.length === 0 &&
-          eleInput3.value.length === 0
-        ) {
-          eleTipInput.style.display = "block";
-          return;
-        }
-
-        const documents = [];
-        if (eleInput1.value.length > 0) {
-          documents.push(eleInput1.value);
-        }
-        if (eleInput2.value.length > 0) {
-          documents.push(eleInput2.value);
-        }
-        if (eleInput3.value.length > 0) {
-          documents.push(eleInput3.value);
-        }
-
-        eleTipAddress.style.display = "none";
-        eleTipModelName.style.display = "none";
-        eleTipQuestion.style.display = "none";
-        eleTipInput.style.display = "none";
-
-        localStorage.setItem("rerank_address", eleAddress.value);
-        localStorage.setItem("rerank_key", eleKey.value);
-        localStorage.setItem("rerank_modelName", eleModelName.value);
-        localStorage.setItem("rerank_question", eleQuestion.value);
-        localStorage.setItem("rerank_input1", eleInput1.value);
-        localStorage.setItem("rerank_input2", eleInput2.value);
-        localStorage.setItem("rerank_input3", eleInput3.value);
-
-        fetch(eleAddress.value, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${eleKey.value}`,
-          },
-          body: JSON.stringify({
-            model: eleModelName.value,
-            top_n: documents.length,
-            query: eleQuestion.value,
-            documents: documents,
-          }),
-        })
-          .then((response) => response.json())
-          .then((resData) => {
-            eleResult.value = JSON.stringify(resData, null, 2);
-            if (resData.results == undefined) {
-              eleTabsJsonData.classList.add("is-active");
-              eleTabsVisual.classList.remove("is-active");
-              eleVisual.style.display = "none";
-              eleJsonData.style.display = "block";
-              return;
-            }
-            renderResult(resData);
-            localStorage.setItem("rerank_result", eleResult.value);
-          })
-          .catch((error) => console.error("Error:", error));
-      });
-
-      eleTabsVisual.addEventListener("click", () => {
-        eleTabsVisual.classList.add("is-active");
-        eleTabsJsonData.classList.remove("is-active");
-        eleVisual.style.display = "block";
-        eleJsonData.style.display = "none";
-      });
-
-      eleTabsJsonData.addEventListener("click", () => {
-        eleTabsJsonData.classList.add("is-active");
-        eleTabsVisual.classList.remove("is-active");
-        eleVisual.style.display = "none";
-        eleJsonData.style.display = "block";
-      });
-
-      function renderResult(jsonData) {
-        eleResultList.innerHTML = "";
-        let newHtml = "";
-        jsonData.results.forEach((item, index) => {
-          const score = item.relevance_score;
-          let percent = (score * 100).toFixed(2);
-          if (percent < 1) {
-            percent = 1;
-          }
-          newHtml += `
-                <div class="result-item">
-                ${index > 0 ? `<hr/>` : ``}
-                <div class="field has-addons">
-                  <p class="control">
-                    <a class="button is-static"> ${index + 1}. </a>
-                  </p>
-                  <div class="control is-expanded">
-                    <input
-                      class="input is-warning"
-                      type="text"
-                      value="${item.document.text}"
-                      readonly
-                    />
-                  </div>
-                </div>
-                <div class="field">
-                  <progress class="progress is-warning" value="${percent}" min="1" max="100">
-                    ${percent}%
-                  </progress>
-                </div>
-                <div class="field" style="margin-bottom: 12px;">
-                  <span class="tag is-warning is-light"
-                    >分数：<span class="score">${score.toFixed(5)}</span></span
-                  >
-                </div>
-              </div>
-            `;
-        });
-        eleResultList.innerHTML = newHtml;
-      }
-
-      const { createApp, ref } = Vue;
+      const { createApp, ref, onMounted } = Vue;
 
       createApp({
         setup() {
-          return {};
-        },
-      }).mount("#app");
+          // 响应式数据
+          const address = ref('');
+          const key = ref('');
+          const modelName = ref('');
+          const question = ref('');
+          const input1 = ref('');
+          const input2 = ref('');
+          const input3 = ref('');
+          const result = ref('');
+          const showAddressTip = ref(false);
+          const showModelNameTip = ref(false);
+          const showQuestionTip = ref(false);
+          const showInputTip = ref(false);
+          const loading = ref(false);
+          const activeTab = ref('visual'); // 默认显示可视化标签页
+          const rerankResults = ref([]); // 存储重排结果
+
+          // 本地存储键名映射
+          const storageKeys = {
+            address: 'rerank_address',
+            key: 'rerank_key',
+            modelName: 'rerank_modelName',
+            question: 'rerank_question',
+            input1: 'rerank_input1',
+            input2: 'rerank_input2',
+            input3: 'rerank_input3',
+            result: 'rerank_result'
+          };
+
+          // 从本地存储加载数据
+          const loadFromStorage = () => {
+            address.value = localStorage.getItem(storageKeys.address) || `${location.origin}/v1/rerank`;
+            key.value = localStorage.getItem(storageKeys.key) || '';
+            modelName.value = localStorage.getItem(storageKeys.modelName) || 'bge-reranker-v2-m3';
+            question.value = localStorage.getItem(storageKeys.question) || '苹果公司的产品有哪些？';
+            input1.value = localStorage.getItem(storageKeys.input1) || 'Apple 是一家伟大的公司，他们的主要产品有 iPhone、iPad 和 Mac。';
+            input2.value = localStorage.getItem(storageKeys.input2) || 'Microsoft 是一家伟大的公司，他们的主要产品有 Windows、Xbox 和 Surface。';
+            input3.value = localStorage.getItem(storageKeys.input3) || 'OpenAI 是一家伟大的公司，他们的主要产品有 GPT-3、GPT-4o、GPT-5。';
+            result.value = localStorage.getItem(storageKeys.result) || '';
+            
+            // 如果有结果数据，解析并显示可视化结果
+            if (result.value) {
+              try {
+                const parsedData = JSON.parse(result.value);
+                if (parsedData.results) {
+                  rerankResults.value = parsedData.results;
+                }
+              } catch (e) {
+                console.error('解析存储结果失败:', e);
+              }
+            }
+          };
+
+          // 只在请求成功后保存数据到本地存储
+          const saveToStorage = () => {
+            localStorage.setItem(storageKeys.address, address.value);
+            localStorage.setItem(storageKeys.key, key.value);
+            localStorage.setItem(storageKeys.modelName, modelName.value);
+            localStorage.setItem(storageKeys.question, question.value);
+            localStorage.setItem(storageKeys.input1, input1.value);
+            localStorage.setItem(storageKeys.input2, input2.value);
+            localStorage.setItem(storageKeys.input3, input3.value);
+            localStorage.setItem(storageKeys.result, result.value);
+          };
+
+          // 发送请求
+          const sendRequest = async () => {
+            // 重置提示信息
+            showAddressTip.value = false;
+            showModelNameTip.value = false;
+            showQuestionTip.value = false;
+            showInputTip.value = false;
+
+            // 验证输入
+            if (!address.value.trim()) {
+              showAddressTip.value = true;
+              return;
+            }
+
+            if (!modelName.value.trim()) {
+              showModelNameTip.value = true;
+              return;
+            }
+
+            if (!question.value.trim()) {
+              showQuestionTip.value = true;
+              return;
+            }
+
+            if (
+              !input1.value.trim() &&
+              !input2.value.trim() &&
+              !input3.value.trim()
+            ) {
+              showInputTip.value = true;
+              return;
+            }
+
+            loading.value = true;
+
+            try {
+              const documents = [];
+              if (input1.value.trim()) documents.push(input1.value.trim());
+              if (input2.value.trim()) documents.push(input2.value.trim());
+              if (input3.value.trim()) documents.push(input3.value.trim());
+
+              const response = await fetch(address.value, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${key.value}`,
+                },
+                body: JSON.stringify({
+                  model: modelName.value,
+                  top_n: documents.length,
+                  query: question.value,
+                  documents: documents,
+                }),
+              });
+
+              const resData = await response.json();
+
+              result.value = JSON.stringify(resData, null, 2);
+              
+              if (resData.results === undefined) {
+                // 如果结果格式不正确，切换到JSON标签页
+                activeTab.value = 'json';
+              } else {
+                // 解析结果并显示可视化
+                rerankResults.value = resData.results;
+                // 切换到可视化标签页
+                activeTab.value = 'visual';
+                // 保存数据到本地存储
+                saveToStorage();
+              }
+            } catch (error) {
+              console.error('Error:', error);
+              result.value = `请求出错: ${error.message}`;
+              activeTab.value = 'json';
+            } finally {
+              loading.value = false;
+            }
+          };
+
+          // 切换标签页
+          const switchTab = (tab) => {
+            activeTab.value = tab;
+          };
+
+          // 计算分数百分比
+          const getScorePercent = (score) => {
+            let percent = (score * 100).toFixed(2);
+            if (percent < 1) {
+              percent = 1;
+            }
+            return percent;
+          };
+
+          // 组件挂载时加载本地存储
+          onMounted(() => {
+            loadFromStorage();
+          });
+
+          return {
+            address,
+            key,
+            modelName,
+            question,
+            input1,
+            input2,
+            input3,
+            result,
+            showAddressTip,
+            showModelNameTip,
+            showQuestionTip,
+            showInputTip,
+            loading,
+            activeTab,
+            rerankResults,
+            sendRequest,
+            switchTab,
+            getScorePercent
+          };
+        }
+      }).mount('#app');
     </script>
   </body>
 </html>
+
+
+
