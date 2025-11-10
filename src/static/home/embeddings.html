@@ -79,6 +79,7 @@
             v-for="(input, index) in inputs"
             :key="index"
             class="field has-addons"
+            style="align-items: center"
           >
             <p class="control">
               <a class="button is-static"> {{ index + 1 }}. </a>
@@ -91,6 +92,16 @@
                 :placeholder="input.placeholder"
               />
             </div>
+            <p
+              class="control"
+              style="margin-left: 10px"
+              v-if="inputs.length > 1"
+            >
+              <button
+                class="delete is-medium"
+                @click="inputs.splice(index, 1)"
+              ></button>
+            </p>
           </div>
 
           <div

@@ -14,7 +14,7 @@
         color: var(--bulma-link);
         font-weight: bold;
       }
-      
+
       .column-title {
         font-size: 26px;
         font-weight: bold;
@@ -98,7 +98,11 @@
             <label class="label">打分重排文本列表：</label>
           </div>
 
-          <div v-for="(input, index) in inputs" :key="index" class="field has-addons">
+          <div
+            v-for="(input, index) in inputs"
+            :key="index"
+            class="field has-addons"
+          >
             <p class="control">
               <a class="button is-static"> {{ index + 1 }}. </a>
             </p>
@@ -110,16 +114,29 @@
                 :placeholder="input.placeholder"
               />
             </div>
+            <p
+              class="control"
+              style="margin-left: 10px"
+              v-if="inputs.length > 1"
+            >
+              <button
+                class="delete is-medium"
+                @click="inputs.splice(index, 1)"
+              ></button>
+            </p>
           </div>
-          
-          <div class="field is-grouped is-grouped-right" style="margin-top: 10px;">
+
+          <div
+            class="field is-grouped is-grouped-right"
+            style="margin-top: 10px"
+          >
             <p class="control">
               <button @click="addInput" class="button is-warning is-outlined">
                 新增重排文本
               </button>
             </p>
           </div>
-          
+
           <div class="notification is-warning" v-show="showInputTip">
             至少要有一行重排文本
           </div>
@@ -138,12 +155,18 @@
           <h2 class="column-title">返回结果：</h2>
           <div class="tabs tabs-result is-centered is-boxed is-warning">
             <ul>
-              <li :class="{ 'is-active': activeTab === 'visual' }" @click="switchTab('visual')">
+              <li
+                :class="{ 'is-active': activeTab === 'visual' }"
+                @click="switchTab('visual')"
+              >
                 <a>
                   <span>可视化</span>
                 </a>
               </li>
-              <li :class="{ 'is-active': activeTab === 'json' }" @click="switchTab('json')">
+              <li
+                :class="{ 'is-active': activeTab === 'json' }"
+                @click="switchTab('json')"
+              >
                 <a>
                   <span>JSON 数据</span>
                 </a>
@@ -166,8 +189,12 @@
               <label class="label">返回结果：</label>
             </div>
             <div class="result-list">
-              <div v-for="(item, index) in rerankResults" :key="index" class="result-item">
-                <div v-if="index > 0"><hr/></div>
+              <div
+                v-for="(item, index) in rerankResults"
+                :key="index"
+                class="result-item"
+              >
+                <div v-if="index > 0"><hr /></div>
                 <div class="field has-addons">
                   <p class="control">
                     <a class="button is-static"> {{ index + 1 }}. </a>
@@ -182,13 +209,20 @@
                   </div>
                 </div>
                 <div class="field">
-                  <progress class="progress is-warning" :value="getScorePercent(item.relevance_score)" min="1" max="100">
+                  <progress
+                    class="progress is-warning"
+                    :value="getScorePercent(item.relevance_score)"
+                    min="1"
+                    max="100"
+                  >
                     {{ getScorePercent(item.relevance_score) }}%
                   </progress>
                 </div>
-                <div class="field" style="margin-bottom: 12px;">
+                <div class="field" style="margin-bottom: 12px">
                   <span class="tag is-warning is-light">
-                    分数：<span class="score">{{ item.relevance_score.toFixed(5) }}</span>
+                    分数：<span class="score"
+                      >{{ item.relevance_score.toFixed(5) }}</span
+                    >
                   </span>
                 </div>
               </div>
@@ -204,52 +238,58 @@
       createApp({
         setup() {
           // 响应式数据
-          const address = ref('');
-          const key = ref('');
-          const modelName = ref('');
-          const question = ref('');
-          const result = ref('');
+          const address = ref("");
+          const key = ref("");
+          const modelName = ref("");
+          const question = ref("");
+          const result = ref("");
           const showAddressTip = ref(false);
           const showModelNameTip = ref(false);
           const showQuestionTip = ref(false);
           const showInputTip = ref(false);
           const loading = ref(false);
-          const activeTab = ref('visual'); // 默认显示可视化标签页
+          const activeTab = ref("visual"); // 默认显示可视化标签页
           const rerankResults = ref([]); // 存储重排结果
-          
+
           // 使用 reactive 创建响应式数组
           const inputs = reactive([
             {
               value: "",
-              placeholder: "请输入文本"
+              placeholder: "请输入文本",
             },
             {
               value: "",
-              placeholder: "请输入文本"
+              placeholder: "请输入文本",
             },
             {
               value: "",
-              placeholder: "请输入文本"
-            }
+              placeholder: "请输入文本",
+            },
           ]);
 
           // 本地存储键名映射
           const storageKeys = {
-            address: 'rerank_address',
-            key: 'rerank_key',
-            modelName: 'rerank_modelName',
-            question: 'rerank_question',
-            inputs: 'rerank_inputs', // 存储所有输入框数据
-            result: 'rerank_result'
+            address: "rerank_address",
+            key: "rerank_key",
+            modelName: "rerank_modelName",
+            question: "rerank_question",
+            inputs: "rerank_inputs", // 存储所有输入框数据
+            result: "rerank_result",
           };
 
           // 从本地存储加载数据
           const loadFromStorage = () => {
-            address.value = localStorage.getItem(storageKeys.address) || `${location.origin}/v1/rerank`;
-            key.value = localStorage.getItem(storageKeys.key) || '';
-            modelName.value = localStorage.getItem(storageKeys.modelName) || 'bge-reranker-v2-m3';
-            question.value = localStorage.getItem(storageKeys.question) || '苹果公司的产品有哪些？';
-            
+            address.value =
+              localStorage.getItem(storageKeys.address) ||
+              `${location.origin}/v1/rerank`;
+            key.value = localStorage.getItem(storageKeys.key) || "";
+            modelName.value =
+              localStorage.getItem(storageKeys.modelName) ||
+              "bge-reranker-v2-m3";
+            question.value =
+              localStorage.getItem(storageKeys.question) ||
+              "苹果公司的产品有哪些？";
+
             // 加载输入框数据
             const savedInputs = localStorage.getItem(storageKeys.inputs);
             if (savedInputs) {
@@ -258,7 +298,7 @@
                 // 清空现有输入框
                 inputs.length = 0;
                 // 添加保存的输入框数据
-                parsedInputs.forEach(input => {
+                parsedInputs.forEach((input) => {
                   inputs.push(input);
                 });
               } catch (e) {
@@ -267,16 +307,19 @@
                 inputs.length = 0;
                 inputs.push(
                   {
-                    value: "Apple 是一家伟大的公司，他们的主要产品有 iPhone、iPad 和 Mac。",
-                    placeholder: "请输入文本"
+                    value:
+                      "Apple 是一家伟大的公司，他们的主要产品有 iPhone、iPad 和 Mac。",
+                    placeholder: "请输入文本",
                   },
                   {
-                    value: "Microsoft 是一家伟大的公司，他们的主要产品有 Windows、Xbox 和 Surface。",
-                    placeholder: "请输入文本"
+                    value:
+                      "Microsoft 是一家伟大的公司，他们的主要产品有 Windows、Xbox 和 Surface。",
+                    placeholder: "请输入文本",
                   },
                   {
-                    value: "OpenAI 是一家伟大的公司，他们的主要产品有 GPT-3、GPT-4o、GPT-5。",
-                    placeholder: "请输入文本"
+                    value:
+                      "OpenAI 是一家伟大的公司，他们的主要产品有 GPT-3、GPT-4o、GPT-5。",
+                    placeholder: "请输入文本",
                   }
                 );
               }
@@ -285,22 +328,25 @@
               inputs.length = 0;
               inputs.push(
                 {
-                  value: "Apple 是一家伟大的公司，他们的主要产品有 iPhone、iPad 和 Mac。",
-                  placeholder: "请输入文本"
+                  value:
+                    "Apple 是一家伟大的公司，他们的主要产品有 iPhone、iPad 和 Mac。",
+                  placeholder: "请输入文本",
                 },
                 {
-                  value: "Microsoft 是一家伟大的公司，他们的主要产品有 Windows、Xbox 和 Surface。",
-                  placeholder: "请输入文本"
+                  value:
+                    "Microsoft 是一家伟大的公司，他们的主要产品有 Windows、Xbox 和 Surface。",
+                  placeholder: "请输入文本",
                 },
                 {
-                  value: "OpenAI 是一家伟大的公司，他们的主要产品有 GPT-3、GPT-4o、GPT-5。",
-                  placeholder: "请输入文本"
+                  value:
+                    "OpenAI 是一家伟大的公司，他们的主要产品有 GPT-3、GPT-4o、GPT-5。",
+                  placeholder: "请输入文本",
                 }
               );
             }
-            
-            result.value = localStorage.getItem(storageKeys.result) || '';
-            
+
+            result.value = localStorage.getItem(storageKeys.result) || "";
+
             // 如果有结果数据，解析并显示可视化结果
             if (result.value) {
               try {
@@ -309,7 +355,7 @@
                   rerankResults.value = parsedData.results;
                 }
               } catch (e) {
-                console.error('解析存储结果失败:', e);
+                console.error("解析存储结果失败:", e);
               }
             }
           };
@@ -328,7 +374,7 @@
           const addInput = () => {
             inputs.push({
               value: "",
-              placeholder: "请输入文本"
+              placeholder: "请输入文本",
             });
           };
 
@@ -357,7 +403,7 @@
             }
 
             // 检查是否有至少一个非空输入
-            const hasNonEmptyInput = inputs.some(input => input.value.trim());
+            const hasNonEmptyInput = inputs.some((input) => input.value.trim());
             if (!hasNonEmptyInput) {
               showInputTip.value = true;
               return;
@@ -368,14 +414,14 @@
             try {
               // 过滤掉空的输入
               const documents = inputs
-                .map(input => input.value.trim())
-                .filter(value => value);
+                .map((input) => input.value.trim())
+                .filter((value) => value);
 
               const response = await fetch(address.value, {
-                method: 'POST',
+                method: "POST",
                 headers: {
-                  'Content-Type': 'application/json',
-                  'Authorization': `Bearer ${key.value}`,
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${key.value}`,
                 },
                 body: JSON.stringify({
                   model: modelName.value,
@@ -388,22 +434,22 @@
               const resData = await response.json();
 
               result.value = JSON.stringify(resData, null, 2);
-              
+
               if (resData.results === undefined) {
                 // 如果结果格式不正确，切换到JSON标签页
-                activeTab.value = 'json';
+                activeTab.value = "json";
               } else {
                 // 解析结果并显示可视化
                 rerankResults.value = resData.results;
                 // 切换到可视化标签页
-                activeTab.value = 'visual';
+                activeTab.value = "visual";
                 // 保存数据到本地存储
                 saveToStorage();
               }
             } catch (error) {
-              console.error('Error:', error);
+              console.error("Error:", error);
               result.value = `请求出错: ${error.message}`;
-              activeTab.value = 'json';
+              activeTab.value = "json";
             } finally {
               loading.value = false;
             }
@@ -445,10 +491,10 @@
             addInput,
             sendRequest,
             switchTab,
-            getScorePercent
+            getScorePercent,
           };
-        }
-      }).mount('#app');
+        },
+      }).mount("#app");
     </script>
   </body>
 </html>
