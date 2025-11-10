@@ -98,47 +98,28 @@
             <label class="label">打分重排文本列表：</label>
           </div>
 
-          <div class="field has-addons">
+          <div v-for="(input, index) in inputs" :key="index" class="field has-addons">
             <p class="control">
-              <a class="button is-static"> 1. </a>
+              <a class="button is-static"> {{ index + 1 }}. </a>
             </p>
             <div class="control is-expanded">
               <input
-                v-model="input1"
+                v-model="input.value"
                 class="input is-warning"
                 type="text"
-                placeholder="Apple 是一家伟大的公司，他们的主要产品有 iPhone、iPad 和 Mac。"
+                :placeholder="input.placeholder"
               />
             </div>
           </div>
-
-          <div class="field has-addons">
+          
+          <div class="field is-grouped is-grouped-right" style="margin-top: 10px;">
             <p class="control">
-              <a class="button is-static"> 2. </a>
+              <button @click="addInput" class="button is-warning is-outlined">
+                新增重排文本
+              </button>
             </p>
-            <div class="control is-expanded">
-              <input
-                v-model="input2"
-                class="input is-warning"
-                type="text"
-                placeholder="Microsoft 是一家伟大的公司，他们的主要产品有 Windows、Xbox 和 Surface。"
-              />
-            </div>
           </div>
-
-          <div class="field has-addons">
-            <p class="control">
-              <a class="button is-static"> 3. </a>
-            </p>
-            <div class="control is-expanded">
-              <input
-                v-model="input3"
-                class="input is-warning"
-                type="text"
-                placeholder="OpenAI 是一家伟大的公司，他们的主要产品有 GPT-3、GPT-4o、GPT-5。"
-              />
-            </div>
-          </div>
+          
           <div class="notification is-warning" v-show="showInputTip">
             至少要有一行重排文本
           </div>
@@ -218,7 +199,7 @@
     </div>
     <script src="/static/home/vue3.global.prod.js"></script>
     <script>
-      const { createApp, ref, onMounted } = Vue;
+      const { createApp, ref, onMounted, reactive } = Vue;
 
       createApp({
         setup() {
@@ -227,9 +208,6 @@
           const key = ref('');
           const modelName = ref('');
           const question = ref('');
-          const input1 = ref('');
-          const input2 = ref('');
-          const input3 = ref('');
           const result = ref('');
           const showAddressTip = ref(false);
           const showModelNameTip = ref(false);
@@ -238,6 +216,22 @@
           const loading = ref(false);
           const activeTab = ref('visual'); // 默认显示可视化标签页
           const rerankResults = ref([]); // 存储重排结果
+          
+          // 使用 reactive 创建响应式数组
+          const inputs = reactive([
+            {
+              value: "",
+              placeholder: "请输入文本"
+            },
+            {
+              value: "",
+              placeholder: "请输入文本"
+            },
+            {
+              value: "",
+              placeholder: "请输入文本"
+            }
+          ]);
 
           // 本地存储键名映射
           const storageKeys = {
@@ -245,9 +239,7 @@
             key: 'rerank_key',
             modelName: 'rerank_modelName',
             question: 'rerank_question',
-            input1: 'rerank_input1',
-            input2: 'rerank_input2',
-            input3: 'rerank_input3',
+            inputs: 'rerank_inputs', // 存储所有输入框数据
             result: 'rerank_result'
           };
 
@@ -257,9 +249,56 @@
             key.value = localStorage.getItem(storageKeys.key) || '';
             modelName.value = localStorage.getItem(storageKeys.modelName) || 'bge-reranker-v2-m3';
             question.value = localStorage.getItem(storageKeys.question) || '苹果公司的产品有哪些？';
-            input1.value = localStorage.getItem(storageKeys.input1) || 'Apple 是一家伟大的公司，他们的主要产品有 iPhone、iPad 和 Mac。';
-            input2.value = localStorage.getItem(storageKeys.input2) || 'Microsoft 是一家伟大的公司，他们的主要产品有 Windows、Xbox 和 Surface。';
-            input3.value = localStorage.getItem(storageKeys.input3) || 'OpenAI 是一家伟大的公司，他们的主要产品有 GPT-3、GPT-4o、GPT-5。';
+            
+            // 加载输入框数据
+            const savedInputs = localStorage.getItem(storageKeys.inputs);
+            if (savedInputs) {
+              try {
+                const parsedInputs = JSON.parse(savedInputs);
+                // 清空现有输入框
+                inputs.length = 0;
+                // 添加保存的输入框数据
+                parsedInputs.forEach(input => {
+                  inputs.push(input);
+                });
+              } catch (e) {
+                console.error("解析输入框数据失败:", e);
+                // 如果解析失败，使用默认值
+                inputs.length = 0;
+                inputs.push(
+                  {
+                    value: "Apple 是一家伟大的公司，他们的主要产品有 iPhone、iPad 和 Mac。",
+                    placeholder: "请输入文本"
+                  },
+                  {
+                    value: "Microsoft 是一家伟大的公司，他们的主要产品有 Windows、Xbox 和 Surface。",
+                    placeholder: "请输入文本"
+                  },
+                  {
+                    value: "OpenAI 是一家伟大的公司，他们的主要产品有 GPT-3、GPT-4o、GPT-5。",
+                    placeholder: "请输入文本"
+                  }
+                );
+              }
+            } else {
+              // 如果没有保存的数据，使用默认值
+              inputs.length = 0;
+              inputs.push(
+                {
+                  value: "Apple 是一家伟大的公司，他们的主要产品有 iPhone、iPad 和 Mac。",
+                  placeholder: "请输入文本"
+                },
+                {
+                  value: "Microsoft 是一家伟大的公司，他们的主要产品有 Windows、Xbox 和 Surface。",
+                  placeholder: "请输入文本"
+                },
+                {
+                  value: "OpenAI 是一家伟大的公司，他们的主要产品有 GPT-3、GPT-4o、GPT-5。",
+                  placeholder: "请输入文本"
+                }
+              );
+            }
+            
             result.value = localStorage.getItem(storageKeys.result) || '';
             
             // 如果有结果数据，解析并显示可视化结果
@@ -281,10 +320,16 @@
             localStorage.setItem(storageKeys.key, key.value);
             localStorage.setItem(storageKeys.modelName, modelName.value);
             localStorage.setItem(storageKeys.question, question.value);
-            localStorage.setItem(storageKeys.input1, input1.value);
-            localStorage.setItem(storageKeys.input2, input2.value);
-            localStorage.setItem(storageKeys.input3, input3.value);
+            localStorage.setItem(storageKeys.inputs, JSON.stringify(inputs));
             localStorage.setItem(storageKeys.result, result.value);
+          };
+
+          // 添加新的输入框
+          const addInput = () => {
+            inputs.push({
+              value: "",
+              placeholder: "请输入文本"
+            });
           };
 
           // 发送请求
@@ -311,11 +356,9 @@
               return;
             }
 
-            if (
-              !input1.value.trim() &&
-              !input2.value.trim() &&
-              !input3.value.trim()
-            ) {
+            // 检查是否有至少一个非空输入
+            const hasNonEmptyInput = inputs.some(input => input.value.trim());
+            if (!hasNonEmptyInput) {
               showInputTip.value = true;
               return;
             }
@@ -323,10 +366,10 @@
             loading.value = true;
 
             try {
-              const documents = [];
-              if (input1.value.trim()) documents.push(input1.value.trim());
-              if (input2.value.trim()) documents.push(input2.value.trim());
-              if (input3.value.trim()) documents.push(input3.value.trim());
+              // 过滤掉空的输入
+              const documents = inputs
+                .map(input => input.value.trim())
+                .filter(value => value);
 
               const response = await fetch(address.value, {
                 method: 'POST',
@@ -390,9 +433,7 @@
             key,
             modelName,
             question,
-            input1,
-            input2,
-            input3,
+            inputs,
             result,
             showAddressTip,
             showModelNameTip,
@@ -401,6 +442,7 @@
             loading,
             activeTab,
             rerankResults,
+            addInput,
             sendRequest,
             switchTab,
             getScorePercent
@@ -410,6 +452,3 @@
     </script>
   </body>
 </html>
-
-
-
