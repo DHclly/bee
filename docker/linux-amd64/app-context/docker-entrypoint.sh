@@ -21,4 +21,4 @@ fi
 echo "Using ${bee_workers} worker(s)..."
 
 # 执行主服务，替换当前进程
-exec uvicorn main:app --host 0.0.0.0 --port 80 --bee_workers "$bee_workers"
+exec uvicorn main:app --host 0.0.0.0 --port 80 --workers "$bee_workers"
