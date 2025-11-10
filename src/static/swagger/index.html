@@ -74,7 +74,7 @@
       }
     </style>
     <link rel="shortcut icon" href="/static/swagger/favicon.png" />
-    <title>{{ title }}</title>
+    <title>[[ title ]]</title>
   </head>
   <body>
     <div id="swagger-ui"></div>
@@ -134,7 +134,7 @@
       };
 
       const ui = SwaggerUIBundle({
-        url: "{{ openapi_url }}",
+        url: "[[ openapi_url ]]",
         dom_id: "#swagger-ui",
         layout: "BaseLayout",
         deepLinking: true,

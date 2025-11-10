@@ -12,10 +12,10 @@ from fastapi.templating import Jinja2Templates
 from routers import chat, embeddings, rerank
 from services import env_service
 from services.http_service import http_clients
+from jinja2 import Environment, FileSystemLoader
 
-
-bee_version = "1.0.1"
-bee_description = "Welcome to Bee, a lightweight LLM API proxy."
+bee_version = "1.1.0"
+bee_description = "欢迎使用 Bee, 一个轻量级 LLM API 代理"
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -34,8 +34,16 @@ app = FastAPI(title="Bee",
 # 挂载静态文件（确保静态资源能被访问）
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
+# 自定义 Jinja2 环境，改用 [{[ ]}] 作为变量定界符
+env = Environment(
+    loader=FileSystemLoader("static"),
+    variable_start_string="[[",   # 改成 [[ 和 ]]
+    variable_end_string="]]",
+    autoescape=True,
+)
+
 # 模板
-jinja_templates = Jinja2Templates(directory="static")
+jinja_templates = Jinja2Templates(env=env)
 
 if env_service.get_show_swagger()=="true":
     # 自定义 /docs 页面
@@ -75,7 +83,8 @@ def home(request: Request):
             "home/index.html",
             {
                 "request": request,
-                "title": "home - bee"
+                "title": "home - bee",
+                "bee_version":bee_version,
             }
         )
     return template_response

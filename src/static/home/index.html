@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="shortcut icon" href="/static/redoc/favicon.png" />
     <link rel="stylesheet" href="/static/home/bulma.min.css" />
-    <title>{{ title }}</title>
+    <title>[[ title ]]</title>
     <style>
       .url {
         margin-top: 20px;
@@ -30,7 +30,7 @@
     </style>
   </head>
   <body>
-    <div class="container is-fluid">
+    <div class="container is-fluid" id="app">
       <section class="hero is-warning">
         <div class="hero-body logo-panel">
           <figure class="image is-200x200 logo-image">
@@ -41,7 +41,7 @@
             />
           </figure>
           <div class="logo-text">
-            <h1 class="title">欢迎使用 Bee</h1>
+            <h1 class="title">欢迎使用 Bee <span class="tag is-primary is-medium">V[[bee_version]]</span></h1>
             <h2 class="subtitle">一个轻量级 LLM API 代理</h2>
           </div>
         </div>
@@ -54,15 +54,15 @@
             <p class="control is-expanded">
               <input
                 id="swagger-url"
-                class="input"
+                class="input is-warning"
                 type="text"
                 placeholder="Find a repository"
-                disabled
-                value=""
+                readonly
+                :value="swaggerUrl"
               />
             </p>
             <p class="control">
-              <button class="button is-warning" id="swagger-btn">
+              <button class="button is-warning" @click="openUrl(swaggerUrl)">
                 访问 swagger ui
               </button>
             </p>
@@ -71,15 +71,15 @@
             <p class="control is-expanded">
               <input
                 id="redoc-url"
-                class="input"
+                class="input is-warning"
                 type="text"
                 placeholder="Find a repository"
-                disabled
-                value=""
+                readonly
+                :value="redocUrl"
               />
             </p>
             <p class="control">
-              <button class="button is-warning" id="redoc-btn">
+              <button class="button is-warning" @click="openUrl(redocUrl)">
                 访问 redoc ui &nbsp;&nbsp;&nbsp;
               </button>
             </p>
@@ -88,37 +88,37 @@
           <div class="box">
             <div class="buttons">
               <a
-                class="button is-warning is-fullwidth is-outlined"
+                class="button is-warning is-fullwidth"
                 href="static/home/chat.html"
                 target="_blank"
                 >测试ChatCompletions问答对话接口</a
               >
               <a
-                class="button is-warning is-fullwidth is-outlined"
+                class="button is-warning is-fullwidth"
                 href="static/home/embeddings.html"
                 target="_blank"
                 >测试Embedding向量接口</a
               >
               <a
-                class="button is-warning is-fullwidth is-outlined"
+                class="button is-warning is-fullwidth"
                 href="static/home/rerank.html"
                 target="_blank"
                 >测试Rerank重排接口</a
               >
               <a
-                class="button is-warning is-fullwidth is-outlined"
+                class="button is-warning is-fullwidth"
                 href="static/home/test-command.html"
                 target="_blank"
                 >测试OCR文字识别接口</a
               >
               <a
-                class="button is-warning is-fullwidth is-outlined"
+                class="button is-warning is-fullwidth"
                 href="static/home/test-command.html"
                 target="_blank"
                 >测试ASR语音识别接口</a
               >
               <a
-                class="button is-warning is-fullwidth is-outlined"
+                class="button is-warning is-fullwidth"
                 href="static/home/test-command.html"
                 target="_blank"
                 >测试命令参考页</a
@@ -130,26 +130,16 @@
       </div>
       <footer class="footer">
         <div class="content has-text-centered">
-          <p><strong>Bee</strong> ,a lightweight LLM API proxy.</p>
-          <p><span>当前时间：</span><span id="now"></span></p>
+          <p><strong>Bee</strong> ,一个轻量级 LLM API 代理</p>
+          <p>
+            <span>当前时间：</span
+            ><span style="font-weight: bold">{{ now }}</span>
+          </p>
         </div>
       </footer>
     </div>
+    <script src="static/home/vue3.global.prod.js"></script>
     <script>
-      var base_url = window.location.origin;
-      document.getElementById("swagger-url").value = base_url + "/docs";
-      document.getElementById("redoc-url").value = base_url + "/redoc";
-      document
-        .getElementById("swagger-btn")
-        .addEventListener("click", function () {
-          window.open(document.getElementById("swagger-url").value);
-        });
-      document
-        .getElementById("redoc-btn")
-        .addEventListener("click", function () {
-          window.open(document.getElementById("redoc-url").value);
-        });
-
       const getCurrentTime = () => {
         const now = new Date();
         const year = now.getFullYear();
@@ -174,10 +164,28 @@
         return text;
       };
 
-      setInterval(() => {
-        document.getElementById("now").innerHTML = getCurrentTime();
-      }, 1000);
-      document.getElementById("now").innerHTML = getCurrentTime();
+      const { createApp, ref } = Vue;
+
+      createApp({
+        setup() {
+          var base_url = window.location.origin;
+          const swaggerUrl = ref(base_url + "/docs");
+          const redocUrl = ref(base_url + "/redoc");
+          const now = ref(getCurrentTime());
+
+          setInterval(() => {
+            now.value = getCurrentTime();
+          }, 1000);
+
+          const openUrl = (url) => window.open(url);
+          return {
+            swaggerUrl,
+            redocUrl,
+            now,
+            openUrl,
+          };
+        },
+      }).mount("#app");
     </script>
   </body>
 </html>
