@@ -18,7 +18,7 @@
     <title>Rerank</title>
   </head>
   <body>
-    <div class="container is-fluid">
+    <div class="container is-fluid" id="app">
       <section class="hero is-warning">
         <div class="hero-body">
           <h1 class="title">文本重排 Rerank</h1>
@@ -177,7 +177,7 @@
         </div>
       </div>
     </div>
-
+    <script src="static/home/vue3.global.prod.js"></script>
     <script>
       const eleAddress = document.querySelector("#address");
       const eleKey = document.querySelector("#key");
@@ -194,7 +194,9 @@
       const eleTipInput = document.querySelector("#tip-input");
       const eleJsonData = document.querySelector("#json-data");
       const eleVisual = document.querySelector("#visual");
-      const eleTabsVisual = document.querySelector(".tabs-result li:nth-child(1)");
+      const eleTabsVisual = document.querySelector(
+        ".tabs-result li:nth-child(1)"
+      );
       const eleTabsJsonData = document.querySelector(
         ".tabs-result li:nth-child(2)"
       );
@@ -406,6 +408,14 @@
         });
         eleResultList.innerHTML = newHtml;
       }
+
+      const { createApp, ref } = Vue;
+
+      createApp({
+        setup() {
+          return {};
+        },
+      }).mount("#app");
     </script>
   </body>
 </html>
