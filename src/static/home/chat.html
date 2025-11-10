@@ -5,6 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="shortcut icon" href="/static/redoc/favicon.png" />
     <link rel="stylesheet" href="/static/home/bulma.min.css" />
+    <style>
+      .column-title {
+        font-size: 26px;
+        font-weight: bold;
+      }
+    </style>
     <title>Chat</title>
   </head>
   <body>
@@ -17,11 +23,12 @@
       </section>
       <div class="columns is-desktop" style="margin-top: 20px">
         <div class="column">
+          <h2 class="column-title">请求参数：</h2>
           <div class="field">
             <label class="label">模型地址：</label>
             <div class="control">
               <input
-                id="address"
+                v-model="address"
                 class="input is-warning"
                 type="text"
                 placeholder="http://localhost:8000/v1/chat/completions"
@@ -29,7 +36,7 @@
               />
             </div>
           </div>
-          <div class="notification is-warning" id="tip-address">
+          <div class="notification is-warning" v-show="showAddressTip">
             请求地址不能为空
           </div>
 
@@ -37,7 +44,7 @@
             <label class="label">模型秘钥：</label>
             <div class="control">
               <input
-                id="key"
+                v-model="key"
                 class="input is-warning"
                 type="text"
                 placeholder="sk-123456"
@@ -49,7 +56,7 @@
             <label class="label">模型名称：</label>
             <div class="control">
               <input
-                id="model-name"
+                v-model="modelName"
                 class="input is-warning"
                 type="text"
                 placeholder="qwen-max"
@@ -59,7 +66,7 @@
               常见对话模型：qwen3,qwen3-vl,deepseek-r1,GPT-5,GPT-4o
             </p>
           </div>
-          <div class="notification is-warning" id="tip-model-name">
+          <div class="notification is-warning" v-show="showModelNameTip">
             模型名称不能为空
           </div>
 
@@ -67,11 +74,11 @@
             <label class="label">stream 流式输出：</label>
             <div class="control">
               <label class="radio">
-                <input type="radio" name="stream" checked value="yes" />
+                <input type="radio" v-model="isStream" value="yes" />
                 是
               </label>
               <label class="radio">
-                <input type="radio" name="stream" value="no" />
+                <input type="radio" v-model="isStream" value="no" />
                 否
               </label>
             </div>
@@ -81,17 +88,17 @@
             <label class="label">图片理解：</label>
             <div class="control">
               <label class="radio">
-                <input type="radio" name="describe-img" value="yes" />
+                <input type="radio" v-model="describeImg" value="yes" />
                 是
               </label>
               <label class="radio">
-                <input type="radio" name="describe-img" checked value="no" />
+                <input type="radio" v-model="describeImg" value="no" />
                 否
               </label>
             </div>
           </div>
 
-          <div class="field test-img">
+          <div class="field test-img" v-show="describeImg === 'yes'">
             <label class="label">测试图片：</label>
             <div class="control">
               <figure
@@ -99,7 +106,7 @@
                 style="width: 35px; height: 32px; border: 1px solid #000"
               >
                 <img
-                  src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAAgACMDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD3misjxPrv/CN+HrzVBZT3jW8TyLDCMbtqFzuboigKSSfoAWKqbeoz30Fuv9nWSXdw77Qss/kxoMElnbDEDjHyqxyRwBlgAXKKwNN17UL/AE/Ud2jeVqthdG0ktBdK0bMQjK4lwP3ZSRGJ27gNw2kgAyaLrV9e6pqGl6ppiWV5ZpFKDDc+fFNFJuCsrFVYENHIpBUdARkGgDbooooAxPGUE114G8QW9vE808um3KRxxqWZ2MTAAAckk9qp+OtW1fSdDg/sW1nkubu6jtXuIbV7k2UbZ3T+UoJfaBwOmSOvQ9PRQBzljLYJ4bvJbe31idHc/a5HtpoLuZiFDy4ZUckKRjyxwFCxj5VUV/CcE0Oqaq9tFqKaLMkD2zaipErzfOsp/efvyMLEAZueML8gWurooAKKKKAP/9k="
+                  :src="testImage"
                 />
               </figure>
             </div>
@@ -109,32 +116,36 @@
             <label class="label">提问问题：</label>
             <div class="control">
               <textarea
-                id="question"
+                v-model="question"
                 class="textarea is-warning"
                 rows="4"
                 placeholder="提问问题"
                 spellcheck="false"
                 autocomplete="off"
-              >
-苹果公司的产品有哪些？</textarea
-              >
+              ></textarea>
             </div>
           </div>
-          <div class="notification is-warning" id="tip-question">
+          <div class="notification is-warning" v-show="showQuestionTip">
             提问问题不能为空
           </div>
 
           <div class="control is-expanded">
-            <button id="send" class="button is-warning is-fullwidth">
+            <button
+              @click="sendRequest"
+              class="button is-warning is-fullwidth"
+              :disabled="loading"
+              :class="{ 'is-loading': loading }"
+            >
               发起请求
             </button>
           </div>
         </div>
         <div class="column">
+          <h2 class="column-title">返回结果：</h2>
           <div class="field">
             <label class="label">返回结果(json or sse)：</label>
             <textarea
-              id="result-json"
+              v-model="resultJson"
               class="textarea is-warning"
               rows="10"
               placeholder="输出结果"
@@ -145,7 +156,7 @@
           <div class="field">
             <label class="label">返回结果(text)：</label>
             <textarea
-              id="result-text"
+              v-model="resultText"
               class="textarea is-warning"
               rows="10"
               placeholder="输出结果"
@@ -158,317 +169,259 @@
     </div>
     <script src="/static/home/vue3.global.prod.js"></script>
     <script>
-      const eleAddress = document.querySelector("#address");
-      const eleKey = document.querySelector("#key");
-      const eleModelName = document.querySelector("#model-name");
-      const eleQuestion = document.querySelector("#question");
-      const eleSend = document.querySelector("#send");
-      const eleResultJson = document.querySelector("#result-json");
-      const eleResultText = document.querySelector("#result-text");
-      const eleTipAddress = document.querySelector("#tip-address");
-      const eleTipModelName = document.querySelector("#tip-model-name");
-      const eleTipQuestion = document.querySelector("#tip-question");
-      const eleStream = document.querySelectorAll('input[name="stream"]');
-      const eleDescribeImg = document.querySelectorAll(
-        'input[name="describe-img"]'
-      );
+      const { createApp, ref, onMounted, watch } = Vue;
 
-      const eleTestImg = document.querySelector(".test-img");
+      createApp({
+        setup() {
+          // 响应式数据
+          const address = ref('');
+          const key = ref('');
+          const modelName = ref('');
+          const isStream = ref('yes'); // 默认是流式输出
+          const describeImg = ref('no'); // 默认不描述图片
+          const question = ref('');
+          const resultJson = ref('');
+          const resultText = ref('');
+          const showAddressTip = ref(false);
+          const showModelNameTip = ref(false);
+          const showQuestionTip = ref(false);
+          const loading = ref(false);
+          const testImage = ref('data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAAgACMDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD3misjxPrv/CN+HrzVBZT3jW8TyLDCMbtqFzuboigKSSfoAWKqbeoz30Fuv9nWSXdw77Qss/kxoMElnbDEDjHyqxyRwBlgAXKKwNN17UL/AE/Ud2jeVqthdG0ktBdK0bMQjK4lwP3ZSRGJ27gNw2kgAyaLrV9e6pqGl6ppiWV5ZpFKDDc+fFNFJuCsrFVYENHIpBUdARkGgDbooooAxPGUE114G8QW9vE808um3KRxxqWZ2MTAAAckk9qp+OtW1fSdDg/sW1nkubu6jtXuIbV7k2UbZ3T+UoJfaBwOmSOvQ9PRQBzljLYJ4bvJbe31idHc/a5HtpoLuZiFDy4ZUckKRjyxwFCxj5VUV/CcE0Oqaq9tFqKaLMkD2zaipErzfOsp/efvyMLEAZueML8gWurooAKKKKAP/9k=');
 
-      eleAddress.value = `${location.origin}/v1/chat/completions`;
-      eleModelName.value = "qwen3";
-      eleQuestion.value = "苹果公司的产品有哪些？";
-
-      eleTestImg.style.display = "none";
-      eleTipAddress.style.display = "none";
-      eleTipModelName.style.display = "none";
-      eleTipQuestion.style.display = "none";
-
-      if (
-        "chat_address" in localStorage &&
-        localStorage.getItem("chat_address").length > 0
-      ) {
-        eleAddress.value = localStorage.getItem("chat_address");
-      }
-      if (
-        "chat_key" in localStorage &&
-        localStorage.getItem("chat_key").length > 0
-      ) {
-        eleKey.value = localStorage.getItem("chat_key");
-      }
-
-      if (
-        "chat_modelName" in localStorage &&
-        localStorage.getItem("chat_modelName").length > 0
-      ) {
-        eleModelName.value = localStorage.getItem("chat_modelName");
-      }
-
-      if (
-        "chat_is_stream" in localStorage &&
-        localStorage.getItem("chat_is_stream").length > 0
-      ) {
-        eleStream.forEach((item) => {
-          if (item.value == localStorage.getItem("chat_is_stream")) {
-            item.checked = true;
-          }
-        });
-      }
-
-      if (
-        "chat_describe_img" in localStorage &&
-        localStorage.getItem("chat_describe_img").length > 0
-      ) {
-        eleDescribeImg.forEach((item) => {
-          if (item.value == localStorage.getItem("chat_describe_img")) {
-            item.checked = true;
-            if (item.value == "yes") {
-              eleTestImg.style.display = "block";
-              eleQuestion.value = "描述一下图片";
+          // 监听图片理解选项变化，自动更新问题
+          watch(() => describeImg.value, (newValue) => {
+            if (newValue === 'yes') {
+              question.value = '描述一下图片';
             } else {
-              eleTestImg.style.display = "none";
-              eleQuestion.value = "mac 是苹果公司的产品么？";
+              question.value = '苹果公司的产品有哪些？';
             }
-          }
-        });
-      }
-
-      if (
-        "chat_result_json" in localStorage &&
-        localStorage.getItem("chat_result_json").length > 0
-      ) {
-        eleResultJson.value = localStorage.getItem("chat_result_json");
-      }
-
-      if (
-        "chat_result_text" in localStorage &&
-        localStorage.getItem("chat_result_text").length > 0
-      ) {
-        eleResultText.value = localStorage.getItem("chat_result_text");
-      }
-
-      eleDescribeImg.forEach((item) => {
-        item.addEventListener("click", () => {
-          if (item.value == "yes") {
-            eleTestImg.style.display = "block";
-            eleQuestion.value = "描述一下图片";
-          } else {
-            eleTestImg.style.display = "none";
-            eleQuestion.value = "mac 是苹果公司的产品么？";
-          }
-        });
-      });
-
-      eleSend.addEventListener("click", () => {
-        if (eleAddress.value.length === 0) {
-          eleTipAddress.style.display = "block";
-          return;
-        }
-
-        if (eleModelName.value.length === 0) {
-          eleTipModelName.style.display = "block";
-          return;
-        }
-
-        if (eleQuestion.value.length === 0) {
-          eleTipQuestion.style.display = "block";
-          return;
-        }
-
-        eleTipAddress.style.display = "none";
-        eleTipModelName.style.display = "none";
-        eleTipQuestion.style.display = "none";
-
-        localStorage.setItem("chat_address", eleAddress.value);
-        localStorage.setItem("chat_key", eleKey.value);
-        localStorage.setItem("chat_modelName", eleModelName.value);
-        localStorage.setItem("chat_question", eleQuestion.value);
-
-        let isStream = false;
-        let isDescribeImg = false;
-        eleStream.forEach((item) => {
-          if (item.checked) {
-            isStream = item.value == "yes";
-            localStorage.setItem("chat_is_stream", item.value);
-          }
-        });
-
-        eleDescribeImg.forEach((item) => {
-          if (item.checked) {
-            isDescribeImg = item.value == "yes";
-            localStorage.setItem("chat_describe_img", item.value);
-          }
-        });
-
-        const content = [];
-        if (isDescribeImg) {
-          content.push({
-            type: "image_url",
-            image_url: {
-              url: eleTestImg.querySelector("img").src,
-            },
           });
-        }
 
-        content.push({ type: "text", text: eleQuestion.value });
+          // 本地存储键名映射
+          const storageKeys = {
+            address: 'chat_address',
+            key: 'chat_key',
+            modelName: 'chat_modelName',
+            isStream: 'chat_is_stream',
+            describeImg: 'chat_describe_img',
+            question: 'chat_question',
+            resultJson: 'chat_result_json',
+            resultText: 'chat_result_text'
+          };
 
-        const req1 = fetch(eleAddress.value, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${eleKey.value}`,
-          },
-          body: JSON.stringify({
-            stream: isStream,
-            model: eleModelName.value,
-            top_p: 1,
-            max_tokens: 4096,
-            messages: [
-              {
-                role: "user",
-                content: content,
-              },
-            ],
-          }),
-        });
+          // 从本地存储加载数据
+          const loadFromStorage = () => {
+            address.value = localStorage.getItem(storageKeys.address) || `${location.origin}/v1/chat/completions`;
+            key.value = localStorage.getItem(storageKeys.key) || '';
+            modelName.value = localStorage.getItem(storageKeys.modelName) || 'qwen3';
+            isStream.value = localStorage.getItem(storageKeys.isStream) || 'yes';
+            describeImg.value = localStorage.getItem(storageKeys.describeImg) || 'no';
+            question.value = localStorage.getItem(storageKeys.question) || '苹果公司的产品有哪些？';
+            resultJson.value = localStorage.getItem(storageKeys.resultJson) || '';
+            resultText.value = localStorage.getItem(storageKeys.resultText) || '';
+          };
 
-        if (isStream) {
-          eleResultJson.value = "";
-          eleResultText.value = "";
+          // 只在请求成功后保存数据到本地存储
+          const saveToStorage = () => {
+            localStorage.setItem(storageKeys.address, address.value);
+            localStorage.setItem(storageKeys.key, key.value);
+            localStorage.setItem(storageKeys.modelName, modelName.value);
+            localStorage.setItem(storageKeys.isStream, isStream.value);
+            localStorage.setItem(storageKeys.describeImg, describeImg.value);
+            localStorage.setItem(storageKeys.question, question.value);
+            localStorage.setItem(storageKeys.resultJson, resultJson.value);
+            localStorage.setItem(storageKeys.resultText, resultText.value);
+          };
 
-          let isScrollScheduled = false;
-          function scheduleScroll(element) {
-            if (!isScrollScheduled) {
-              isScrollScheduled = true;
-              requestAnimationFrame(() => {
-                element.scrollTop = element.scrollHeight;
-                isScrollScheduled = false;
-              });
+          // 发送请求
+          const sendRequest = async () => {
+            // 重置提示信息
+            showAddressTip.value = false;
+            showModelNameTip.value = false;
+            showQuestionTip.value = false;
+
+            // 验证输入
+            if (!address.value.trim()) {
+              showAddressTip.value = true;
+              return;
             }
-          }
 
-          let isScrollScheduled2 = false;
-          function scheduleScroll2(element) {
-            if (!isScrollScheduled2) {
-              isScrollScheduled2 = true;
-              requestAnimationFrame(() => {
-                element.scrollTop = element.scrollHeight;
-                isScrollScheduled2 = false;
-              });
+            if (!modelName.value.trim()) {
+              showModelNameTip.value = true;
+              return;
             }
-          }
 
-          req1
-            .then((response) => {
-              if (!response.ok) {
-                return response.text().then(function (text) {
-                  eleResultJson.value = "HTTP " + response.status + ": " + text;
-                  return;
+            if (!question.value.trim()) {
+              showQuestionTip.value = true;
+              return;
+            }
+
+            loading.value = true;
+
+            try {
+              const content = [];
+              if (describeImg.value === 'yes') {
+                content.push({
+                  type: 'image_url',
+                  image_url: {
+                    url: testImage.value,
+                  },
                 });
               }
 
-              if (!response.body) {
-                eleResultJson.value =
-                  "ReadableStream not supported in this browser";
-                return;
-              }
+              content.push({ type: 'text', text: question.value });
 
-              const reader = response.body.getReader();
-              const decoder = new TextDecoder("utf-8");
-              let buffer = "";
+              const response = await fetch(address.value, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${key.value}`,
+                },
+                body: JSON.stringify({
+                  stream: isStream.value === 'yes',
+                  model: modelName.value,
+                  top_p: 1,
+                  max_tokens: 4096,
+                  messages: [
+                    {
+                      role: 'user',
+                      content: content,
+                    },
+                  ],
+                }),
+              });
 
-              function readLine() {
-                return reader.read().then(function (result) {
-                  if (result.done) {
-                    localStorage.setItem(
-                      "chat_result_json",
-                      eleResultJson.value
-                    );
-                    localStorage.setItem(
-                      "chat_result_text",
-                      eleResultText.value
-                    );
+              if (isStream.value === 'yes') {
+                resultJson.value = '';
+                resultText.value = '';
+
+                let isScrollScheduled = false;
+                function scheduleScroll(element) {
+                  if (!isScrollScheduled) {
+                    isScrollScheduled = true;
+                    requestAnimationFrame(() => {
+                      element.scrollTop = element.scrollHeight;
+                      isScrollScheduled = false;
+                    });
+                  }
+                }
+
+                let isScrollScheduled2 = false;
+                function scheduleScroll2(element) {
+                  if (!isScrollScheduled2) {
+                    isScrollScheduled2 = true;
+                    requestAnimationFrame(() => {
+                      element.scrollTop = element.scrollHeight;
+                      isScrollScheduled2 = false;
+                    });
+                  }
+                }
+
+                if (!response.body) {
+                  resultJson.value = 'ReadableStream not supported in this browser';
+                  return;
+                }
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder('utf-8');
+                let buffer = '';
+
+                async function readLine() {
+                  const { done, value } = await reader.read();
+                  
+                  if (done) {
+                    // 请求成功后保存数据
+                    saveToStorage();
                     return;
                   }
 
-                  buffer += decoder.decode(result.value, { stream: true });
+                  buffer += decoder.decode(value, { stream: true });
 
                   // 按行分割处理
-                  const lines = buffer.split("\n");
-                  buffer = lines.pop() || ""; // 保留未完成的最后一行
+                  const lines = buffer.split('\n');
+                  buffer = lines.pop() || ''; // 保留未完成的最后一行
 
-                  for (var i = 0; i < lines.length; i++) {
-                    var line = lines[i].trim();
-                    eleResultJson.value += line + "\n";
-                    scheduleScroll(eleResultJson);
+                  for (let i = 0; i < lines.length; i++) {
+                    const line = lines[i].trim();
+                    resultJson.value += line + '\n';
+                    scheduleScroll(document.querySelector('#result-json'));
 
-                    if (line.startsWith("data: ")) {
-                      var dataStr = line.slice(6).trim();
+                    if (line.startsWith('data: ')) {
+                      const dataStr = line.slice(6).trim();
 
-                      if (dataStr === "[DONE]") {
-                        localStorage.setItem(
-                          "chat_result_json",
-                          eleResultJson.value
-                        );
-                        localStorage.setItem(
-                          "chat_result_text",
-                          eleResultText.value
-                        );
+                      if (dataStr === '[DONE]') {
+                        // 请求成功后保存数据
+                        saveToStorage();
                         return;
                       }
 
                       try {
-                        var chunk = JSON.parse(dataStr);
+                        const chunk = JSON.parse(dataStr);
 
                         if (chunk.choices == undefined) {
                           return;
                         }
 
-                        if (chunk.choices[0].delta.reasoning_content != null) {
-                          eleResultText.value +=
-                            chunk.choices[0].delta.reasoning_content;
-                        } else {
-                          eleResultText.value += chunk.choices[0].delta.content;
+                        if (chunk.choices[0].delta?.reasoning_content != null) {
+                          resultText.value += chunk.choices[0].delta.reasoning_content;
+                        } else if (chunk.choices[0].delta?.content != null) {
+                          resultText.value += chunk.choices[0].delta.content;
                         }
-                        scheduleScroll2(eleResultText);
+                        scheduleScroll2(document.querySelector('#result-text'));
                       } catch (e) {
-                        console.warn("Failed to parse SSE data:", dataStr, e);
+                        console.warn('Failed to parse SSE data:', dataStr, e);
                       }
                     }
                   }
 
                   // 继续读取下一块
-                  readLine();
-                });
+                  await readLine();
+                }
+
+                await readLine();
+              } else {
+                const resData = await response.json();
+                resultJson.value = JSON.stringify(resData, null, 2);
+
+                if (resData.choices != undefined) {
+                  resultText.value = resData.choices[0].message?.content || '';
+                }
+
+                // 请求成功后保存数据
+                saveToStorage();
               }
+            } catch (error) {
+              console.error('Error:', error);
+              resultJson.value = `请求出错: ${error.message}`;
+              loading.value = false;
+            } finally {
+              loading.value = false;
+            }
+          };
 
-              readLine();
-            })
-            .catch((error) => console.error("Error:", error));
-        } else {
-          req1
-            .then((response) => response.json())
-            .then((resData) => {
-              eleResultJson.value = JSON.stringify(resData, null, 2);
-              if (resData.choices == undefined) {
-                return;
-              }
+          // 组件挂载时加载本地存储
+          onMounted(() => {
+            loadFromStorage();
+          });
 
-              localStorage.setItem("chat_result_json", eleResultJson.value);
-
-              eleResultText.value = resData.choices[0].message.content;
-              localStorage.setItem("chat_result_text", eleResultText.value);
-            })
-            .catch((error) => console.error("Error:", error));
+          return {
+            address,
+            key,
+            modelName,
+            isStream,
+            describeImg,
+            question,
+            resultJson,
+            resultText,
+            showAddressTip,
+            showModelNameTip,
+            showQuestionTip,
+            loading,
+            testImage,
+            sendRequest
+          };
         }
-      });
-      const { createApp, ref } = Vue;
-
-      createApp({
-        setup() {
-          return {};
-        },
-      }).mount("#app");
+      }).mount('#app');
     </script>
   </body>
 </html>
