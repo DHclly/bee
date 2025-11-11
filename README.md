@@ -62,3 +62,5 @@ docker run -d --name=bee \
 -p 8090:80 \
 bee/bee:v1.1.2-amd64
 ```
+
+访问地址：http://localhost:8090
