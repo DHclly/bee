@@ -287,6 +287,7 @@
             // 清空 input，确保同一张图能再次触发 change
             event.target.value = "";
           };
+
           const scrollTextareaToBottom = (refTextarea) => {
             let scheduled = false; // ← 改名更准确
 
@@ -404,7 +405,7 @@
                   for (let i = 0; i < lines.length; i++) {
                     const line = lines[i].trim();
                     resultJson.value += line + "\n";
-                    scrollResultJsonToBottom(resultJsonTextarea);
+                    scrollResultJsonToBottom();
                     if (line.startsWith("data: ")) {
                       const dataStr = line.slice(6).trim();
 
@@ -427,7 +428,7 @@
                         } else if (chunk.choices[0].delta?.content != null) {
                           resultText.value += chunk.choices[0].delta.content;
                         }
-                        scrollResultTextToBottom(resultTextTextarea);
+                        scrollResultTextToBottom();
                       } catch (e) {
                         console.warn("Failed to parse SSE data:", dataStr, e);
                       }
@@ -473,6 +474,8 @@
             question,
             resultJson,
             resultText,
+            resultJsonTextarea,
+            resultTextTextarea,
             showAddressTip,
             showModelNameTip,
             showQuestionTip,

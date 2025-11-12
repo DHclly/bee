@@ -4,6 +4,7 @@
 
 # 2025.11.12
 
+docker build --platform linux/arm64 --pull=false --tag bee/bee:v1.1.7-arm64 --file docker/linux-arm64/03-build-app-image/Dockerfile .
 docker build --platform linux/arm64 --pull=false --tag bee/bee:v1.1.6-arm64 --file docker/linux-arm64/03-build-app-image/Dockerfile .
 docker build --platform linux/arm64 --pull=false --tag bee/bee:v1.1.5-arm64 --file docker/linux-arm64/03-build-app-image/Dockerfile .
 docker build --platform linux/arm64 --pull=false --tag bee/bee:v1.1.4-arm64 --file docker/linux-arm64/03-build-app-image/Dockerfile .

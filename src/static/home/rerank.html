@@ -177,7 +177,7 @@
             <div class="field">
               <label class="label">JSON：</label>
               <textarea
-                ref="resultTextarea"
+                ref="resultJsonTextarea"
                 v-model="result"
                 class="textarea is-warning"
                 rows="20"
@@ -244,7 +244,7 @@
           const modelName = ref("");
           const question = ref("");
           const result = ref("");
-          const resultTextarea = ref(null);
+          const resultJsonTextarea = ref(null);
           const showAddressTip = ref(false);
           const showModelNameTip = ref(false);
           const showQuestionTip = ref(false);
@@ -325,7 +325,6 @@
             }
 
             result.value = localStorage.getItem(storageKeys.result) || "";
-
             // 如果有结果数据，解析并显示可视化结果
             if (result.value) {
               try {
@@ -383,7 +382,8 @@
             return innerScrollTextareaToBottom;
           };
 
-          const scrollResultToBottom = scrollTextareaToBottom(resultTextarea);
+          const scrollResultToBottom =
+            scrollTextareaToBottom(resultJsonTextarea);
 
           // 发送请求
           const sendRequest = async () => {
@@ -441,10 +441,10 @@
               const resData = await response.json();
 
               result.value = JSON.stringify(resData, null, 2);
-
               if (resData.results === undefined) {
                 // 如果结果格式不正确，切换到JSON标签页
                 activeTab.value = "json";
+                scrollResultToBottom();
               } else {
                 // 解析结果并显示可视化
                 for (let i = 0; i < resData.results.length; i++) {
@@ -471,6 +471,9 @@
           // 切换标签页
           const switchTab = (tab) => {
             activeTab.value = tab;
+            if (tab == "json") {
+              scrollResultToBottom();
+            }
           };
 
           // 计算分数百分比
@@ -494,6 +497,7 @@
             question,
             inputs,
             result,
+            resultJsonTextarea,
             showAddressTip,
             showModelNameTip,
             showQuestionTip,
