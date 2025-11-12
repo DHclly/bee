@@ -338,17 +338,19 @@
             loading.value = true;
 
             try {
-              const content = [];
+              let content = null;
               if (describeImg.value === "yes") {
+                content = [];
                 content.push({
                   type: "image_url",
                   image_url: {
                     url: testImage.value,
                   },
                 });
+                content.push({ type: "text", text: question.value });
+              } else {
+                content = question.value;
               }
-
-              content.push({ type: "text", text: question.value });
 
               const response = await fetch(address.value, {
                 method: "POST",

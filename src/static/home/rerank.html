@@ -441,6 +441,12 @@
                 activeTab.value = "json";
               } else {
                 // 解析结果并显示可视化
+                for (let i = 0; i < resData.results.length; i++) {
+                  let item = resData.results[i];
+                  if (item.document == null || item.document == undefined) {
+                    item.document = { text: "" };
+                  }
+                }
                 rerankResults.value = resData.results;
                 // 切换到可视化标签页
                 activeTab.value = "visual";
