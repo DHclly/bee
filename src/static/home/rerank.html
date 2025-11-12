@@ -331,6 +331,12 @@
               try {
                 const parsedData = JSON.parse(result.value);
                 if (parsedData.results) {
+                  for (let i = 0; i < parsedData.results.length; i++) {
+                    let item = parsedData.results[i];
+                    if (item.document == null || item.document == undefined) {
+                      item.document = { text: "" };
+                    }
+                  }
                   rerankResults.value = parsedData.results;
                 }
               } catch (e) {
