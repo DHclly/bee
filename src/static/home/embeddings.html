@@ -147,7 +147,7 @@
           <div class="field">
             <label class="label">JSON：</label>
             <textarea
-              ref="resultTextarea"
+              ref="resultJsonTextarea"
               v-model="result"
               class="textarea is-warning"
               rows="20"
@@ -169,7 +169,7 @@
           const key = ref("");
           const modelName = ref("");
           const result = ref("");
-          const resultTextarea = ref(null);
+          const resultJsonTextarea = ref(null);
           const modelDimensions = ref(0);
           const showAddressTip = ref(false);
           const showModelNameTip = ref(false);
@@ -289,7 +289,7 @@
             return innerScrollTextareaToBottom;
           };
 
-          const scrollResultToBottom = scrollTextareaToBottom(resultTextarea);
+          const scrollResultToBottom = scrollTextareaToBottom(resultJsonTextarea);
 
           // 发送请求
           const sendRequest = async () => {
@@ -370,6 +370,7 @@
           // 组件挂载时加载本地存储
           onMounted(() => {
             loadFromStorage();
+            scrollResultToBottom();
           });
 
           return {
@@ -378,6 +379,7 @@
             modelName,
             inputs,
             result,
+            resultJsonTextarea,
             modelDimensions,
             showAddressTip,
             showModelNameTip,
