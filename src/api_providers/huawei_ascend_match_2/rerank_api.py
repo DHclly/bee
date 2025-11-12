@@ -1,6 +1,6 @@
 from api_defines.bee.models.rerank_args import RerankArgs as BeeRerankArgs
 from api_defines.bee.models.rerank_result import RerankResult as BeeRerankResult
-from services import env_service, uuid_service
+from services import env_service
 
 
 def get_request_url(args:BeeRerankArgs):
@@ -51,12 +51,14 @@ def get_request_args(args:BeeRerankArgs)->dict:
     """
     args_json=args.model_dump()
     # 组装为当前对接平台的参数格式
-    args_dict={
-        "model": args_json["model"],
-        "query": args_json["query"],
-        "texts": args_json["documents"]
-    }
-    
+    # args_dict={
+    #     "model": args_json["model"],
+    #     "query": args_json["query"],
+    #     "documents": args_json["documents"],
+    #     "top_n": args_json["top_n"],
+    #     "return_documents": args_json["return_documents"]
+    # }
+    args_dict=args_json
     return args_dict
 
 def get_request_result(result:dict)->BeeRerankResult:
@@ -103,15 +105,12 @@ def get_request_result(result:dict)->BeeRerankResult:
     }
     """
     
-    result_dict = {
-        "id": f"rerank-{uuid_service.get_uuid()}",
-        "model": "rerank",
-        "usage": None,
-        "results": [{
-                "index": r["index"],
-                "relevance_score": r["score"]
-            } for r in result]
-    }
-    
+    # result_dict = {
+    #     "id": result["id"],
+    #     "model": result["model"],
+    #     "usage": result["usage"],
+    #     "results": result["results"]
+    # }
+    result_dict=result
     result_obj = BeeRerankResult(**result_dict)
     return result_obj

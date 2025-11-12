@@ -2,7 +2,7 @@ from api_defines.bee.models.embeddings_args import EmbeddingsArgs as BeeEmbeddin
 from api_defines.bee.models.embeddings_result import (
     EmbeddingsResult as BeeEmbeddingsResult,
 )
-from services import env_service, time_service, uuid_service
+from services import env_service
 
 
 def get_request_url(args:BeeEmbeddingsArgs):
@@ -50,11 +50,11 @@ def get_request_args(args:BeeEmbeddingsArgs)->dict:
     """
     # 组装为当前对接平台的参数格式
     args_json=args.model_dump()
-    args_dict={
-        "model": args_json["model"],
-        "inputs": args_json["input"],
-    }
-    
+    # args_dict={
+    #     "model": args_json["model"],
+    #     "input": args_json["input"],
+    # }
+    args_dict=args_json
     return args_dict
 
 def get_request_result(result:dict)->BeeEmbeddingsResult:
@@ -95,18 +95,14 @@ def get_request_result(result:dict)->BeeEmbeddingsResult:
     }
     """
     
-    result_dict = {
-        "id": f"embed-{uuid_service.get_uuid()}",
-        "object": "list",
-        "created": time_service.get_current_timestamp_int(),
-        "model": "embed",
-        "usage": None,
-        "data": [{
-                "index": index,
-                "object": "embedding",
-                "embedding": embedding
-            } for index,embedding in enumerate(result)]
-    }
-    
+    # result_dict = {
+    #     "id": result["id"],
+    #     "object": result["object"],
+    #     "created": result["created"],
+    #     "model": result["model"],
+    #     "usage": result["usage"],
+    #     "data": result["data"]
+    # }
+    result_dict=result
     result_obj = BeeEmbeddingsResult(**result_dict)
     return result_obj

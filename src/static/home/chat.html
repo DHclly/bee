@@ -311,6 +311,7 @@
             scrollTextareaToBottom(resultJsonTextarea);
           const scrollResultTextToBottom =
             scrollTextareaToBottom(resultTextTextarea);
+
           // 发送请求
           const sendRequest = async () => {
             // 重置提示信息
@@ -373,28 +374,6 @@
                 resultJson.value = "";
                 resultText.value = "";
 
-                let isScrollScheduled = false;
-                function scheduleScroll(element) {
-                  if (!isScrollScheduled) {
-                    isScrollScheduled = true;
-                    requestAnimationFrame(() => {
-                      element.scrollTop = element.scrollHeight;
-                      isScrollScheduled = false;
-                    });
-                  }
-                }
-
-                let isScrollScheduled2 = false;
-                function scheduleScroll2(element) {
-                  if (!isScrollScheduled2) {
-                    isScrollScheduled2 = true;
-                    requestAnimationFrame(() => {
-                      element.scrollTop = element.scrollHeight;
-                      isScrollScheduled2 = false;
-                    });
-                  }
-                }
-
                 if (!response.body) {
                   resultJson.value =
                     "ReadableStream not supported in this browser";
@@ -423,8 +402,7 @@
                   for (let i = 0; i < lines.length; i++) {
                     const line = lines[i].trim();
                     resultJson.value += line + "\n";
-                    scheduleScroll(document.querySelector("#result-json"));
-
+                    scrollResultJsonToBottom(resultJsonTextarea);
                     if (line.startsWith("data: ")) {
                       const dataStr = line.slice(6).trim();
 
@@ -447,7 +425,7 @@
                         } else if (chunk.choices[0].delta?.content != null) {
                           resultText.value += chunk.choices[0].delta.content;
                         }
-                        scheduleScroll2(document.querySelector("#result-text"));
+                        scrollResultTextToBottom(resultTextTextarea);
                       } catch (e) {
                         console.warn("Failed to parse SSE data:", dataStr, e);
                       }
