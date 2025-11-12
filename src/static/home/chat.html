@@ -224,7 +224,13 @@
               if (newValue === "yes") {
                 question.value = "描述一下图片";
               } else {
-                question.value = "苹果公司的产品有哪些？";
+                let newQuestion = "苹果公司的产品有哪些？";
+                if (
+                  localStorage.getItem(storageKeys.question) != "描述一下图片"
+                ) {
+                  newQuestion = localStorage.getItem(storageKeys.question);
+                }
+                question.value = newQuestion;
               }
             }
           );
@@ -437,7 +443,7 @@
                   // 继续读取下一块
                   await readLine();
                 }
-                
+
                 saveToStorage();
                 await readLine();
               } else {
