@@ -12,7 +12,7 @@ rerank_api=load_rerank_api()
 async def rerank(args:BeeRerankArgs,token: str)->BeeRerankResult | APIErrorResult:
     response=None
     try:
-        request_url=rerank_api.get_request_url()
+        request_url=rerank_api.get_request_url(args)
         request_headers = rerank_api.get_request_headers(token)
         request_args = rerank_api.get_request_args(pre_process_args(args))
         

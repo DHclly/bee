@@ -5,7 +5,7 @@ from api_defines.bee.models.embeddings_result import (
 from services import env_service
 
 
-def get_request_url():
+def get_request_url(args:BeeEmbeddingsArgs):
     url=env_service.get_embeddings_url()
     return url
 

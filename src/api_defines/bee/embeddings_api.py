@@ -12,7 +12,7 @@ embeddings_api=load_embeddings_api()
 async def embeddings(args:BeeEmbeddingsArgs,token: str)->BeeEmbeddingsResult | APIErrorResult:
     response=None
     try:
-        request_url=embeddings_api.get_request_url()
+        request_url=embeddings_api.get_request_url(args)
         request_headers = embeddings_api.get_request_headers(token)
         request_args = embeddings_api.get_request_args(pre_process_args(args))
         

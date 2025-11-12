@@ -6,7 +6,7 @@ from api_defines.bee.models.chat_result import (
 from services import env_service
 
 
-def get_request_url():
+def get_request_url(args:BeeChatArgs):
     url=env_service.get_chat_url()
     return url
 

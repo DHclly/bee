@@ -3,7 +3,7 @@ from api_defines.bee.models.rerank_result import RerankResult as BeeRerankResult
 from services import env_service
 
 
-def get_request_url():
+def get_request_url(args:BeeRerankArgs):
     url=env_service.get_rerank_url()
     return url
 

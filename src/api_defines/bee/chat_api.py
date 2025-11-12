@@ -16,7 +16,7 @@ chat_api=load_chat_api()
 async def chat(args:BeeChatArgs,token: str)->BeeChatResult | StreamingResponse | APIErrorResult:
     response_error_text=""
     try:
-        request_url=chat_api.get_request_url()
+        request_url=chat_api.get_request_url(args)
         request_headers = chat_api.get_request_headers(token)
         request_args = chat_api.get_request_args(pre_process_args(args))
         client=http_clients.chat_client
@@ -91,7 +91,8 @@ async def chat(args:BeeChatArgs,token: str)->BeeChatResult | StreamingResponse |
 
 def pre_process_args(args:BeeChatArgs)->BeeChatArgs:
     if args.stream:
-        args.stream_options=BeeChatStreamOptionsModel(include_usage=True)
+        if args.stream_options is None:
+            args.stream_options=BeeChatStreamOptionsModel(include_usage=False)
     return args
 
 
