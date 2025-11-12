@@ -363,7 +363,6 @@
                   stream: isStream.value === "yes",
                   model: modelName.value,
                   top_p: 1,
-                  max_tokens: 4096,
                   messages: [
                     {
                       role: "user",
@@ -438,7 +437,8 @@
                   // 继续读取下一块
                   await readLine();
                 }
-
+                
+                saveToStorage();
                 await readLine();
               } else {
                 const resData = await response.json();
@@ -463,6 +463,8 @@
           // 组件挂载时加载本地存储
           onMounted(() => {
             loadFromStorage();
+            scrollResultJsonToBottom();
+            scrollResultTextToBottom();
           });
 
           return {
