@@ -145,8 +145,9 @@
           </div>
 
           <div class="field">
-            <label class="label">返回结果(json)：</label>
+            <label class="label">JSON：</label>
             <textarea
+              ref="resultTextarea"
               v-model="result"
               class="textarea is-warning"
               rows="20"
@@ -168,6 +169,7 @@
           const key = ref("");
           const modelName = ref("");
           const result = ref("");
+          const resultTextarea = ref(null);
           const modelDimensions = ref(0);
           const showAddressTip = ref(false);
           const showModelNameTip = ref(false);
@@ -267,6 +269,28 @@
             });
           };
 
+          const scrollTextareaToBottom = (refTextarea) => {
+            let scheduled = false; // ← 改名更准确
+
+            const innerScrollTextareaToBottom = () => {
+              if (scheduled) {
+                return;
+              }
+              scheduled = true;
+
+              requestAnimationFrame(() => {
+                if (refTextarea.value) {
+                  refTextarea.value.scrollTop = refTextarea.value.scrollHeight;
+                }
+                scheduled = false;
+              });
+            };
+
+            return innerScrollTextareaToBottom;
+          };
+
+          const scrollResultToBottom = scrollTextareaToBottom(resultTextarea);
+
           // 发送请求
           const sendRequest = async () => {
             // 重置提示信息
@@ -333,6 +357,7 @@
 
                 // 只有在请求成功后才保存数据到本地存储
                 saveToStorage();
+                scrollResultToBottom();
               }
             } catch (error) {
               console.error("Error:", error);

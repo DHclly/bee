@@ -166,8 +166,9 @@
         <div class="column">
           <h2 class="column-title">返回结果：</h2>
           <div class="field">
-            <label class="label">返回结果(json or sse)：</label>
+            <label class="label">JSON or SSE：</label>
             <textarea
+              ref="resultJsonTextarea"
               v-model="resultJson"
               class="textarea is-warning"
               rows="10"
@@ -177,8 +178,9 @@
             ></textarea>
           </div>
           <div class="field">
-            <label class="label">返回结果(text)：</label>
+            <label class="label">TEXT：</label>
             <textarea
+              ref="resultTextTextarea"
               v-model="resultText"
               class="textarea is-warning"
               rows="10"
@@ -205,6 +207,8 @@
           const question = ref("");
           const resultJson = ref("");
           const resultText = ref("");
+          const resultJsonTextarea = ref(null);
+          const resultTextTextarea = ref(null);
           const showAddressTip = ref(false);
           const showModelNameTip = ref(false);
           const showQuestionTip = ref(false);
@@ -283,7 +287,30 @@
             // 清空 input，确保同一张图能再次触发 change
             event.target.value = "";
           };
+          const scrollTextareaToBottom = (refTextarea) => {
+            let scheduled = false; // ← 改名更准确
 
+            const innerScrollTextareaToBottom = () => {
+              if (scheduled) {
+                return;
+              }
+              scheduled = true;
+
+              requestAnimationFrame(() => {
+                if (refTextarea.value) {
+                  refTextarea.value.scrollTop = refTextarea.value.scrollHeight;
+                }
+                scheduled = false;
+              });
+            };
+
+            return innerScrollTextareaToBottom;
+          };
+
+          const scrollResultJsonToBottom =
+            scrollTextareaToBottom(resultJsonTextarea);
+          const scrollResultTextToBottom =
+            scrollTextareaToBottom(resultTextTextarea);
           // 发送请求
           const sendRequest = async () => {
             // 重置提示信息
