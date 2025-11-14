@@ -4,6 +4,7 @@ FROM bee/bee-build:v1.0.1-amd64 AS build
 WORKDIR /app/bee
 
 COPY src .
+RUN rm -f .env
 COPY README.md ./README.md
 
 RUN uv tool run pyclean .
