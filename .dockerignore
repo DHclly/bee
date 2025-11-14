@@ -18,6 +18,8 @@ logs/
 # 忽略开发配置
 .env
 .dockerenv
+src/.env
+src/logs
 
 # 忽略 Git 相关
 .git
