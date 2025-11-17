@@ -3,10 +3,30 @@ from api_defines.bee.models.embeddings_result import (
     EmbeddingsResult as BeeEmbeddingsResult,
 )
 from services import env_service
+import os
+from services.log_service import logger
 
+urls=[]
+url_index=0
+
+def set_urls():
+    global urls
+    urls.append(os.getenv('bee_embeddings_url_1'))
+    urls.append(os.getenv('bee_embeddings_url_2'))
+    urls.append(os.getenv('bee_embeddings_url_3'))
+    urls.append(os.getenv('bee_embeddings_url_4'))
+    logger.info(f"embeddings urls: {urls}")
+
+set_urls()
+
+def get_url():
+    global url_index
+    url =urls[url_index]
+    url_index=(url_index+1)%len(urls)
+    return url
 
 def get_request_url(args:BeeEmbeddingsArgs):
-    url=env_service.get_embeddings_url()
+    url = get_url()
     return url
 
 def get_request_headers(token: str):

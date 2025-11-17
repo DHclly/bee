@@ -1,10 +1,28 @@
 from api_defines.bee.models.rerank_args import RerankArgs as BeeRerankArgs
 from api_defines.bee.models.rerank_result import RerankResult as BeeRerankResult
 from services import env_service
+import os
+from services.log_service import logger
 
+urls=[]
+url_index=0
+
+def set_urls():
+    global urls
+    urls.append(os.getenv('bee_rerank_url_1'))
+    urls.append(os.getenv('bee_rerank_url_2'))
+    logger.info(f"rerank urls: {urls}")
+
+set_urls()
+
+def get_url():
+    global url_index
+    url =urls[url_index]
+    url_index=(url_index+1)%len(urls)
+    return url
 
 def get_request_url(args:BeeRerankArgs):
-    url=env_service.get_rerank_url()
+    url=get_url()
     return url
 
 def get_request_headers(token: str):
