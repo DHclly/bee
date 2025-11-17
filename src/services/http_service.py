@@ -10,22 +10,22 @@ class HttpClientManager:
     async def startup(self):
         self.embeddings_client = httpx.AsyncClient(timeout=httpx.Timeout(
             connect=3.0,
-            read=10.0,
-            write=10.0,
+            read=60.0,
+            write=30.0,
             pool=5.0
         ))
         
         self.rerank_client = httpx.AsyncClient(timeout=httpx.Timeout(
             connect=3.0,
-            read=10.0,
-            write=10.0,
+            read=60.0,
+            write=310.0,
             pool=5.0
         ))
         
         self.chat_client = httpx.AsyncClient(timeout=httpx.Timeout(
             connect=3.0,   # 连接服务器最多 3 秒
-            read=120.0,     # 读取响应最多 30 秒（适合大响应或慢模型）
-            write=10.0,    # 发送请求最多 10 秒
+            read=300.0,     # 读取响应最多 30 秒（适合大响应或慢模型）
+            write=30.0,    # 发送请求最多 10 秒
             pool=5.0       # 等待连接池最多 5 秒
         ))
 
