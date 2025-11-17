@@ -9,7 +9,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from routers import chat, embeddings, rerank
+from routers import chat, embeddings, rerank,embed,ocr,asr,tts
 from services import env_service
 from services.http_service import http_clients
 from jinja2 import Environment, FileSystemLoader
@@ -80,6 +80,10 @@ if env_service.get_show_redoc()=="true":
 app.include_router(chat.router)
 app.include_router(embeddings.router)
 app.include_router(rerank.router)
+app.include_router(embed.router)
+app.include_router(ocr.router)
+app.include_router(asr.router)
+app.include_router(tts.router)
 
 @app.get(path="/",include_in_schema=False)
 def home(request: Request):

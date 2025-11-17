@@ -39,3 +39,15 @@ def load_embeddings_api() -> ModuleType:
 def load_chat_api() -> ModuleType:
     provider_name=env_service.get_provider_type()
     return load_api_provider_api(provider_name,"chat_api")
+
+def load_ocr_api() -> ModuleType:
+    provider_name=env_service.get_provider_type()
+    return load_api_provider_api(provider_name,"ocr_api")
+
+def load_asr_api() -> ModuleType:
+    provider_name=env_service.get_provider_type()
+    return load_api_provider_api(provider_name,"asr_api")
+
+def load_tts_api() -> ModuleType:
+    provider_name=env_service.get_provider_type()
+    return load_api_provider_api(provider_name,"tts_api")

@@ -7,9 +7,13 @@ from .models.error_result import APIErrorResult
 from .models.rerank_args import RerankArgs as BeeRerankArgs
 from .models.rerank_result import RerankResult as BeeRerankResult
 
-rerank_api=load_rerank_api()
+rerank_api=None
 
 async def rerank(args:BeeRerankArgs,token: str)->BeeRerankResult | APIErrorResult:
+    global rerank_api
+    if rerank_api is None:
+        rerank_api=load_rerank_api()
+        
     response=None
     try:
         request_url=rerank_api.get_request_url(args)

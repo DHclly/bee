@@ -11,9 +11,13 @@ from .models.chat_args import ChatArgs as BeeChatArgs,ChatStreamOptionsModel as 
 from .models.chat_result import ChatResult as BeeChatResult
 from .models.error_result import APIErrorResult
 
-chat_api=load_chat_api()
+chat_api=None
 
 async def chat(args:BeeChatArgs,token: str)->BeeChatResult | StreamingResponse | APIErrorResult:
+    global chat_api
+    if chat_api is None:
+        chat_api=load_chat_api()
+        
     response_error_text=""
     try:
         request_url=chat_api.get_request_url(args)

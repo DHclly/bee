@@ -7,9 +7,13 @@ from .models.embeddings_args import EmbeddingsArgs as BeeEmbeddingsArgs
 from .models.embeddings_result import EmbeddingsResult as BeeEmbeddingsResult
 from .models.error_result import APIErrorResult
 
-embeddings_api=load_embeddings_api()
+embeddings_api=None
 
 async def embeddings(args:BeeEmbeddingsArgs,token: str)->BeeEmbeddingsResult | APIErrorResult:
+    global embeddings_api
+    if embeddings_api is None:
+        embeddings_api=load_embeddings_api()
+    
     response=None
     try:
         request_url=embeddings_api.get_request_url(args)
