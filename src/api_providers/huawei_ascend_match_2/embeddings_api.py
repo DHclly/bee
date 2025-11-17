@@ -68,6 +68,13 @@ def get_request_args(args:BeeEmbeddingsArgs)->dict:
         ]
     }
     """
+    for i in range(len(args.input)):
+        input_len=len(args.input[i])
+        if input_len > 4096:
+            args.input[i]=args.input[i][0:4096]
+            logger.warning("请求参与向量化的文本过长，文本长度{input_len}，已截断为4096字符以内")
+            logger.warning(f"原始文本前100字符: {args.input[i][0:100]}")
+    
     # 组装为当前对接平台的参数格式
     args_json=args.model_dump()
     # args_dict={
