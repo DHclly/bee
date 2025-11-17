@@ -3,7 +3,7 @@ from api_defines.bee.models.embeddings_result import (
     EmbeddingsResult as BeeEmbeddingsResult,
 )
 from services import env_service
-
+from services.log_service import logger
 
 def get_request_url(args:BeeEmbeddingsArgs):
     url=env_service.get_embeddings_url()

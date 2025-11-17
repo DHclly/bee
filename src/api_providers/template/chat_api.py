@@ -4,7 +4,7 @@ from api_defines.bee.models.chat_result import (
     ChatStreamChunkResult as BeeChatStreamChunkResult,
 )
 from services import env_service
-
+from services.log_service import logger
 
 def get_request_url(args:BeeChatArgs):
     url=env_service.get_chat_url()

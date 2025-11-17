@@ -1,7 +1,7 @@
 from api_defines.bee.models.rerank_args import RerankArgs as BeeRerankArgs
 from api_defines.bee.models.rerank_result import RerankResult as BeeRerankResult
 from services import env_service
-
+from services.log_service import logger
 
 def get_request_url(args:BeeRerankArgs):
     url=env_service.get_rerank_url()
