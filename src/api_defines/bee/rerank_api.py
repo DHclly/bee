@@ -10,12 +10,11 @@ from .models.rerank_result import RerankResult as BeeRerankResult
 rerank_api=None
 
 async def rerank(args:BeeRerankArgs,token: str)->BeeRerankResult | APIErrorResult:
-    global rerank_api
-    if rerank_api is None:
-        rerank_api=load_rerank_api()
-        
     response=None
     try:
+        global rerank_api
+        if rerank_api is None:
+            rerank_api=load_rerank_api()
         request_url=rerank_api.get_request_url(args)
         request_headers = rerank_api.get_request_headers(token)
         request_args = rerank_api.get_request_args(pre_process_args(args))

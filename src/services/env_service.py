@@ -8,13 +8,28 @@ def get_auth_key():
     return os.getenv('bee_auth_key', 'sk_123')
 
 def get_embeddings_url():
+    # 支持英文的分号;分隔
     return os.getenv('bee_embeddings_url', 'http://localhost/v1/embeddings')
 
 def get_rerank_url():
+    # 支持英文的分号;分隔
     return os.getenv('bee_rerank_url', 'http://localhost/v1/rerank')
 
 def get_chat_url():
+    # 支持英文的分号;分隔
     return os.getenv('bee_chat_url', 'http://localhost/v1/chat/completions')
+
+def get_ocr_url():
+    # 支持英文的分号;分隔
+    return os.getenv('bee_ocr_url', 'http://localhost/v1/chat/completions')
+
+def get_asr_url():
+    # 支持英文的分号;分隔
+    return os.getenv('bee_asr_url', 'http://localhost/v1/chat/completions')
+
+def get_tts_url():
+    # 支持英文的分号;分隔
+    return os.getenv('bee_tts_url', 'http://localhost/v1/chat/completions')
 
 def get_provider_type():
     return os.getenv('bee_provider_type', 'gpustack')

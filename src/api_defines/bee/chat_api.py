@@ -14,12 +14,11 @@ from .models.error_result import APIErrorResult
 chat_api=None
 
 async def chat(args:BeeChatArgs,token: str)->BeeChatResult | StreamingResponse | APIErrorResult:
-    global chat_api
-    if chat_api is None:
-        chat_api=load_chat_api()
-        
     response_error_text=""
     try:
+        global chat_api
+        if chat_api is None:
+            chat_api=load_chat_api()
         request_url=chat_api.get_request_url(args)
         request_headers = chat_api.get_request_headers(token)
         request_args = chat_api.get_request_args(pre_process_args(args))
@@ -59,7 +58,7 @@ async def chat(args:BeeChatArgs,token: str)->BeeChatResult | StreamingResponse |
                                 
                             line_data=line.json()
                             logger.debug(f"原始返回参数：{line_data}\n")
-                            new_line_data=chat_api.get_request_stream_chunk_result(line_data)
+                            new_line_data=chat_api.get_request_stream_chunk_result(line_data) # type: ignore
                             new_line_data_json=new_line_data.model_dump_json()
                             logger.debug(f"修改后返回参数：{new_line_data_json}\n")
                             new_line=get_sse_message(new_line_data_json)

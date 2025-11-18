@@ -10,12 +10,11 @@ from .models.error_result import APIErrorResult
 embeddings_api=None
 
 async def embeddings(args:BeeEmbeddingsArgs,token: str)->BeeEmbeddingsResult | APIErrorResult:
-    global embeddings_api
-    if embeddings_api is None:
-        embeddings_api=load_embeddings_api()
-    
     response=None
     try:
+        global embeddings_api
+        if embeddings_api is None:
+            embeddings_api=load_embeddings_api()
         request_url=embeddings_api.get_request_url(args)
         request_headers = embeddings_api.get_request_headers(token)
         request_args = embeddings_api.get_request_args(pre_process_args(args))
