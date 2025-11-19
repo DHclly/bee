@@ -82,7 +82,8 @@ async def download(file_id:str = FastAPIPath(..., description="文件的唯一�
     if file_name=="not_found":
         return Response(
             content=file_content,
-            media_type="plain/text"
+            media_type="text/plain",
+            headers={}
         )
     
     mime_type, _ = mimetypes.guess_type(file_name)
