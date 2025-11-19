@@ -74,7 +74,7 @@ async def delete(file_id:str = FastAPIPath(..., description="文件的唯一标�
             description="根据文件ID获取文件的下载URL"
             )
 async def download(file_id:str = FastAPIPath(..., description="文件的唯一标识符", min_length=1),
-                   force_download: bool = Query(False, description="是否强制浏览器下载（而非预览）")
+                   force_download: bool = Query(True, description="是否强制浏览器下载（而非预览）")
                    )-> Response:
     
     file_name,file_content= await bee_download(file_id)
