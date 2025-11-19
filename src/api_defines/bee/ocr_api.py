@@ -4,20 +4,26 @@ from services.module_load_service import load_ocr_api
 from api_defines.bee.models.ocr_args import OcrArgs as BeeOcrArgs
 from api_defines.bee.models.ocr_result import OcrResultModel as BeeOcrResultModel
 from .models.error_result import APIErrorResult
+import asyncio
 
 ocr_api=None
+ocr_api_initialized = False
+ocr_api_lock = asyncio.Lock()
 
 async def ocr(args:BeeOcrArgs,token: str)->BeeOcrResultModel|APIErrorResult:
-    
+    global ocr_api, ocr_api_initialized
     response=None
     try:
-        global ocr_api
-        if ocr_api is None:
-            ocr_api=load_ocr_api()
+        if not ocr_api_initialized:
+            async with ocr_api_lock:
+                if not ocr_api_initialized:
+                    ocr_api=load_ocr_api()
+                    await ocr_api.init() # type: ignore
+                    ocr_api_initialized=True
         
-        request_url=ocr_api.get_request_url(args)
-        request_headers = ocr_api.get_request_headers(token)
-        request_args = ocr_api.get_request_args(pre_process_args(args))
+        request_url=await ocr_api.get_request_url(args) # type: ignore
+        request_headers =await ocr_api.get_request_headers(token) # type: ignore
+        request_args =await ocr_api.get_request_args(pre_process_args(args)) # type: ignore
         
         logger.info(f"发起文字识别请求,地址:{request_url}\n")
         logger.debug(f"请求头参数：{request_headers}\n")
@@ -29,7 +35,7 @@ async def ocr(args:BeeOcrArgs,token: str)->BeeOcrResultModel|APIErrorResult:
         response.raise_for_status()
         result_data = response.json()
         logger.debug(f"原始返回参数：{result_data}\n")
-        result = ocr_api.get_request_result(result_data)
+        result = await ocr_api.get_request_result(result_data) # type: ignore
         logger.debug(f"修改后返回参数：{result.model_dump_json()}\n")
         logger.info("文字识别请求成功")
         return result

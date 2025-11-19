@@ -2,37 +2,48 @@ from api_defines.bee.models.ocr_args import OcrArgs as BeeOcrArgs
 from api_defines.bee.models.ocr_result import OcrResultModel as BeeOcrResultModel
 from services import env_service
 from services.log_service import logger
+import random
 
 urls=[]
-url_index=0
 
-def set_urls():
+async def set_urls():
     global urls
+    if len(urls) > 0:
+        return
+    
     env_urls=env_service.get_ocr_url()
     urls=env_urls.split(";")
     logger.info(f"ocr urls: {urls}")
 
-set_urls()
-
-def get_url():
-    global url_index
-    url =urls[url_index]
-    url_index=(url_index+1)%len(urls)
+async def get_url():
+    url=random.choice(urls)
     return url
 
-def get_request_url(args:BeeOcrArgs):
+async def init():
+    """
+    初始化函数
+    """
+    await set_urls()
+
+
+async def get_request_url(args:BeeOcrArgs):
+    """
+    获取请求 URL 函数
+    """
     global urls
     if len(urls) == 0:
-        set_urls()
+        await set_urls()
         
     if len(urls) == 0:
         raise ValueError("ocr urls is empty")
         
-    url=get_url()
+    url=await get_url()
     return url
 
-def get_request_headers(token: str):
-    
+async def get_request_headers(token: str):
+    """
+    获取请求头函数
+    """
     # 认证方式
     auth_type=env_service.get_auth_type()
     
@@ -49,8 +60,9 @@ def get_request_headers(token: str):
     }
     return headers
 
-def get_request_args(args:BeeOcrArgs)->dict:
-    """ OCR 格式参数转为当前对接平台的参数格式
+async def get_request_args(args:BeeOcrArgs)->dict:
+    """
+    OCR 格式参数转为当前对接平台的参数格式函数
 
     Args:
         args (BeeOcrArgs): 请求参数对象
@@ -94,8 +106,9 @@ def get_request_args(args:BeeOcrArgs)->dict:
     
     return args_dict
 
-def get_request_result(result:dict)->BeeOcrResultModel:
-    """获取请求结果，转换为 OCR 格式
+async def get_request_result(result:dict)->BeeOcrResultModel:
+    """
+    获取当前平台请求结果，转换为 OCR 格式函数
 
     Args:
         result (dict): 请求参数对象
