@@ -6,7 +6,7 @@ from api_defines.bee.models.chat_result import (
 from services import env_service
 import os
 
-def get_request_url(args:BeeChatArgs):
+async def get_request_url(args:BeeChatArgs):
     if args.model =="qwen3-32b":
         url=os.getenv('bee_chat_url_1', 'http://localhost/v1/chat/completions')
     elif args.model =="qwen3-14b":
@@ -15,7 +15,7 @@ def get_request_url(args:BeeChatArgs):
         url=env_service.get_chat_url()
     return url
 
-def get_request_headers(token: str):
+async def get_request_headers(token: str):
     
     # 认证方式
     auth_type=env_service.get_auth_type()
@@ -33,7 +33,7 @@ def get_request_headers(token: str):
     }
     return headers
 
-def get_request_args(args:BeeChatArgs)->dict:
+async def get_request_args(args:BeeChatArgs)->dict:
     """OpenAI格式参数转为当前对接平台的参数格式
 
     Args:
@@ -81,7 +81,7 @@ def get_request_args(args:BeeChatArgs)->dict:
     args_dict=args_json
     return args_dict
 
-def get_request_result(result:dict)->BeeChatResult:
+async def get_request_result(result:dict)->BeeChatResult:
     """获取非流式请求结果，转换为OpenAI格式
 
     Args:
@@ -122,7 +122,7 @@ def get_request_result(result:dict)->BeeChatResult:
     result_obj = BeeChatResult(**result_dict)
     return result_obj
 
-def get_request_stream_chunk_result(result:dict)->BeeChatStreamChunkResult:
+async def get_request_stream_chunk_result(result:dict)->BeeChatStreamChunkResult:
     """获取流式请求块结果，转换为OpenAI格式
 
     Args:

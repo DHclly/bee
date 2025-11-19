@@ -6,18 +6,26 @@ from services.module_load_service import load_rerank_api
 from .models.error_result import APIErrorResult
 from .models.rerank_args import RerankArgs as BeeRerankArgs
 from .models.rerank_result import RerankResult as BeeRerankResult
+import asyncio
 
 rerank_api=None
+rerank_api_initialized = False
+rerank_api_lock = asyncio.Lock()
 
 async def rerank(args:BeeRerankArgs,token: str)->BeeRerankResult | APIErrorResult:
     response=None
+    global rerank_api, rerank_api_initialized
     try:
-        global rerank_api
-        if rerank_api is None:
-            rerank_api=load_rerank_api()
-        request_url=rerank_api.get_request_url(args)
-        request_headers = rerank_api.get_request_headers(token)
-        request_args = rerank_api.get_request_args(pre_process_args(args))
+        if not rerank_api_initialized:
+            async with rerank_api_lock:
+                if not rerank_api_initialized:
+                    rerank_api = load_rerank_api()
+                    await rerank_api.init() # type: ignore
+                    rerank_api_initialized=True
+                    
+        request_url= await rerank_api.get_request_url(args) # type: ignore
+        request_headers = await rerank_api.get_request_headers(token) # type: ignore
+        request_args = await rerank_api.get_request_args(pre_process_args(args)) # type: ignore
         
         logger.info(f"发起重排请求,地址:{request_url}\n")
         logger.debug(f"请求头参数：{request_headers}\n")
@@ -29,7 +37,7 @@ async def rerank(args:BeeRerankArgs,token: str)->BeeRerankResult | APIErrorResul
         response.raise_for_status()
         result_data = response.json()
         logger.debug(f"原始返回参数：{result_data}\n")
-        result = rerank_api.get_request_result(result_data)
+        result = await rerank_api.get_request_result(result_data) # type: ignore
         logger.debug(f"修改后返回参数：{result.model_dump_json()}\n")
         logger.info("重排请求成功")
         return result

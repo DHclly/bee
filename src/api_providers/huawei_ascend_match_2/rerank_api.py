@@ -7,7 +7,7 @@ from services.log_service import logger
 urls=[]
 url_index=0
 
-def set_urls():
+async def set_urls():
     global urls
     urls.append(os.getenv('bee_rerank_url_1'))
     urls.append(os.getenv('bee_rerank_url_2'))
@@ -15,17 +15,17 @@ def set_urls():
 
 set_urls()
 
-def get_url():
+async def get_url():
     global url_index
     url =urls[url_index]
     url_index=(url_index+1)%len(urls)
     return url
 
-def get_request_url(args:BeeRerankArgs):
+async def get_request_url(args:BeeRerankArgs):
     url=get_url()
     return url
 
-def get_request_headers(token: str):
+async def get_request_headers(token: str):
     
     # 认证方式
     auth_type=env_service.get_auth_type()
@@ -43,7 +43,7 @@ def get_request_headers(token: str):
     }
     return headers
 
-def get_request_args(args:BeeRerankArgs)->dict:
+async def get_request_args(args:BeeRerankArgs)->dict:
     """OpenAI格式参数转为当前对接平台的参数格式
 
     Args:
@@ -79,7 +79,7 @@ def get_request_args(args:BeeRerankArgs)->dict:
     args_dict=args_json
     return args_dict
 
-def get_request_result(result:dict)->BeeRerankResult:
+async def get_request_result(result:dict)->BeeRerankResult:
     """获取请求结果，转换为OpenAI格式
 
     Args:

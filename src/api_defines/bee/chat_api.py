@@ -10,18 +10,26 @@ from services.sse_service import get_sse_message
 from .models.chat_args import ChatArgs as BeeChatArgs,ChatStreamOptionsModel as BeeChatStreamOptionsModel
 from .models.chat_result import ChatResult as BeeChatResult
 from .models.error_result import APIErrorResult
+import asyncio
 
 chat_api=None
+chat_api_initialized = False
+chat_api_lock = asyncio.Lock()
 
 async def chat(args:BeeChatArgs,token: str)->BeeChatResult | StreamingResponse | APIErrorResult:
     response_error_text=""
+    global chat_api, chat_api_initialized
     try:
-        global chat_api
-        if chat_api is None:
-            chat_api=load_chat_api()
-        request_url=chat_api.get_request_url(args)
-        request_headers = chat_api.get_request_headers(token)
-        request_args = chat_api.get_request_args(pre_process_args(args))
+        if not chat_api_initialized:
+            async with chat_api_lock:
+                if not chat_api_initialized:
+                    chat_api = load_chat_api()
+                    await chat_api.init() # type: ignore
+                    chat_api_initialized=True
+                    
+        request_url=await chat_api.get_request_url(args) # type: ignore
+        request_headers =await chat_api.get_request_headers(token) # type: ignore
+        request_args =await chat_api.get_request_args(pre_process_args(args)) # type: ignore
         client=http_clients.chat_client
         
         logger.info(f"发起问答对话请求,地址:{request_url}\n")
@@ -58,7 +66,7 @@ async def chat(args:BeeChatArgs,token: str)->BeeChatResult | StreamingResponse |
                                 
                             line_data=line.json()
                             logger.debug(f"原始返回参数：{line_data}\n")
-                            new_line_data=chat_api.get_request_stream_chunk_result(line_data) # type: ignore
+                            new_line_data=await chat_api.get_request_stream_chunk_result(line_data) # type: ignore
                             new_line_data_json=new_line_data.model_dump_json()
                             logger.debug(f"修改后返回参数：{new_line_data_json}\n")
                             new_line=get_sse_message(new_line_data_json)
@@ -82,7 +90,7 @@ async def chat(args:BeeChatArgs,token: str)->BeeChatResult | StreamingResponse |
             response.raise_for_status()
             result_data = response.json()
             logger.debug(f"原始返回参数：{result_data}\n")
-            result = chat_api.get_request_result(result_data)
+            result =await chat_api.get_request_result(result_data) # type: ignore
             logger.debug(f"修改后返回参数：{result.model_dump_json()}\n")
             logger.info("问答对话请求成功")
             return result

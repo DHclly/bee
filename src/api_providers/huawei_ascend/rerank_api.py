@@ -3,11 +3,11 @@ from api_defines.bee.models.rerank_result import RerankResult as BeeRerankResult
 from services import env_service, uuid_service
 
 
-def get_request_url(args:BeeRerankArgs):
+async def get_request_url(args:BeeRerankArgs):
     url=env_service.get_rerank_url()
     return url
 
-def get_request_headers(token: str):
+async def get_request_headers(token: str):
     
     # 认证方式
     auth_type=env_service.get_auth_type()
@@ -25,7 +25,7 @@ def get_request_headers(token: str):
     }
     return headers
 
-def get_request_args(args:BeeRerankArgs)->dict:
+async def get_request_args(args:BeeRerankArgs)->dict:
     """OpenAI格式参数转为当前对接平台的参数格式
 
     Args:
@@ -59,7 +59,7 @@ def get_request_args(args:BeeRerankArgs)->dict:
     
     return args_dict
 
-def get_request_result(result:dict)->BeeRerankResult:
+async def get_request_result(result:dict)->BeeRerankResult:
     """获取请求结果，转换为OpenAI格式
 
     Args:

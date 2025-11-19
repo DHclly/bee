@@ -5,11 +5,11 @@ from api_defines.bee.models.embeddings_result import (
 from services import env_service
 from services.log_service import logger
 
-def get_request_url(args:BeeEmbeddingsArgs):
+async def get_request_url(args:BeeEmbeddingsArgs):
     url=env_service.get_embeddings_url()
     return url
 
-def get_request_headers(token: str):
+async def get_request_headers(token: str):
     
     # 认证方式
     auth_type=env_service.get_auth_type()
@@ -27,7 +27,7 @@ def get_request_headers(token: str):
     }
     return headers
 
-def get_request_args(args:BeeEmbeddingsArgs)->dict:
+async def get_request_args(args:BeeEmbeddingsArgs)->dict:
     """OpenAI格式参数转为当前对接平台的参数格式
 
     Args:
@@ -57,7 +57,7 @@ def get_request_args(args:BeeEmbeddingsArgs)->dict:
     args_dict=args_json
     return args_dict
 
-def get_request_result(result:dict)->BeeEmbeddingsResult:
+async def get_request_result(result:dict)->BeeEmbeddingsResult:
     """获取请求结果，转换为OpenAI格式
 
     Args:

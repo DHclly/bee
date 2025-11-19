@@ -11,8 +11,8 @@ ocr_api_initialized = False
 ocr_api_lock = asyncio.Lock()
 
 async def ocr(args:BeeOcrArgs,token: str)->BeeOcrResultModel|APIErrorResult:
-    global ocr_api, ocr_api_initialized
     response=None
+    global ocr_api, ocr_api_initialized
     try:
         if not ocr_api_initialized:
             async with ocr_api_lock:
