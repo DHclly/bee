@@ -110,10 +110,7 @@
               <figure
                 @click="toggleZoom1"
                 class="image"
-                style="
-                  border: 1px solid #000;
-                  margin-right: 10px;
-                "
+                style="border: 1px solid #000; margin-right: 10px"
               >
                 <img
                   :src="testImage"
@@ -298,7 +295,7 @@
             // 清空 input，确保同一张图能再次触发 change
             event.target.value = "";
           };
-          
+
           const toggleZoom1 = () => {
             isImgZoom1.value = !isImgZoom1.value;
           };
@@ -414,7 +411,9 @@
 
                   // 按行分割处理
                   const lines = buffer.split("\n");
-                  buffer = lines.pop() || ""; // 保留未完成的最后一行
+                  if (lines.length > 1) {
+                    buffer = lines.pop() || ""; // 保留未完成的最后一行
+                  }
 
                   for (let i = 0; i < lines.length; i++) {
                     const line = lines[i].trim();
