@@ -6,6 +6,8 @@ WORKDIR /app/bee
 COPY src .
 RUN rm -f .env
 COPY README.md ./README.md
+COPY change_log.txt ./change_log.txt
+COPY .python-version ./.python-version
 
 RUN uv tool run pyclean .
 

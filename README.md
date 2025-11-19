@@ -81,3 +81,18 @@ docker pull dhclly/bee:v1.2.1-arm64
 ## github 地址
 
 [DHclly/bee: Bee, a lightweight LLM API proxy.(https://github.com/DHclly/bee)](https://github.com/DHclly/bee)
+
+## 代码检测命令
+
+ruff
+
+```bash
+# 安装
+uv add ruff --dev --active
+
+# 检测命令
+ruff check src
+
+# 自动修复
+ruff check src --fix
+```

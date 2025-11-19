@@ -55,4 +55,5 @@ dependencies = [
 [dependency-groups]
 dev = [
     "pyclean>=3.1.0",
+    "ruff>=0.14.5",
 ]

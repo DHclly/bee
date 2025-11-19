@@ -5,13 +5,47 @@ from api_defines.bee.models.chat_result import (
 )
 from services import env_service
 from services.log_service import logger
+import random
 
+urls=[]
+
+async def set_urls():
+    global urls
+    if len(urls) > 0:
+        return
+    
+    env_urls=env_service.get_chat_url()
+    urls=env_urls.split(";")
+    logger.info(f"ocr urls: {urls}")
+
+async def get_url():
+    url=random.choice(urls)
+    return url
+
+async def init():
+    """
+    初始化函数
+    """
+    await set_urls()
+    
 async def get_request_url(args:BeeChatArgs):
-    url=env_service.get_chat_url()
+    """
+    获取请求 URL 函数
+    """
+    global urls
+    if len(urls) == 0:
+        await set_urls()
+        
+    if len(urls) == 0:
+        raise ValueError("chat urls is empty")
+        
+    url=await get_url()
     return url
 
 async def get_request_headers(token: str):
-    
+    """
+    获取请求头函数
+    """
     # 认证方式
     auth_type=env_service.get_auth_type()
     
