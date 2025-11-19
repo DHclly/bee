@@ -9,7 +9,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from routers import chat, embeddings, rerank,embed,ocr,asr,tts
+from routers import chat, embeddings, rerank,embed,ocr,asr,tts,file_storage
 from services import env_service
 from services.http_service import http_clients
 from jinja2 import Environment, FileSystemLoader
@@ -84,6 +84,7 @@ app.include_router(embed.router)
 app.include_router(ocr.router)
 app.include_router(asr.router)
 app.include_router(tts.router)
+app.include_router(file_storage.router)
 
 @app.get(path="/",include_in_schema=False)
 def home(request: Request):

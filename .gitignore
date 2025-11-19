@@ -15,3 +15,5 @@ logs/
 docker/images
 
 .ruff_cache
+
+file_storage/

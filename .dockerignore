@@ -43,3 +43,5 @@ op.txt
 .ruff_cache
 
 src/logs
+
+file_storage/
