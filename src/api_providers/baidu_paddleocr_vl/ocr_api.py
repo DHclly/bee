@@ -124,8 +124,7 @@ async def get_request_result(result:dict)->BeeOcrResultModel:
         "json_content": {
             "text": "hello world"
         },
-        "model": "deepseek-ocr",
-        "cost_time": 2000
+        "model": "deepseek-ocr"
     }
     """
     result_dict = {
@@ -133,8 +132,7 @@ async def get_request_result(result:dict)->BeeOcrResultModel:
         "json_content": {
             "text": result["choices"][0]["message"]["content"]
         },
-        "model": result["model"],
-        "cost_time": -1
+        "model": result["model"]
     }
     
     result_obj = BeeOcrResultModel(**result_dict)

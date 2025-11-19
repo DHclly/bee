@@ -101,7 +101,13 @@ async def get_request_args(args:BeeOcrArgs)->dict:
                     }
                 ]
             }
-        ]
+        ],
+        "skip_special_tokens": False,
+        "vllm_xargs": {
+            "ngram_size": 30,
+            "window_size": 90,
+            "whitelist_token_ids": [128821, 128822]
+        }
     }
     
     return args_dict
@@ -124,8 +130,7 @@ async def get_request_result(result:dict)->BeeOcrResultModel:
         "json_content": {
             "text": "hello world"
         },
-        "model": "deepseek-ocr",
-        "cost_time": 2000
+        "model": "deepseek-ocr"
     }
     """
     result_dict = {
@@ -133,8 +138,7 @@ async def get_request_result(result:dict)->BeeOcrResultModel:
         "json_content": {
             "text": result["choices"][0]["message"]["content"]
         },
-        "model": result["model"],
-        "cost_time": -1
+        "model": result["model"]
     }
     
     result_obj = BeeOcrResultModel(**result_dict)

@@ -23,9 +23,3 @@ class OcrResultModel(BaseModel):
         description="使用的 OCR 模型名称，例如 `deepseek-ocr`、`paddleocr`、`paddleocr-vl`",
         examples=["deepseek-ocr"]
     )
-    
-    cost_time: int|None = Field(
-        None,
-        description="OCR识别耗费的时间，单位为毫秒（ms）。,-1 表示未统计",
-        examples=[1500]
-    )
