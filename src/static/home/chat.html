@@ -179,7 +179,11 @@
             ></textarea>
           </div>
           <div class="field">
-            <label class="label">TEXT：</label>
+            <label class="label"
+              >TEXT：<span v-show="isStream === 'yes'"
+                >(速度：{{textIn1sLength}}/s)</span
+              ></label
+            >
             <textarea
               ref="resultTextTextarea"
               v-model="resultText"
@@ -218,6 +222,11 @@
             "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAAgACMDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD3misjxPrv/CN+HrzVBZT3jW8TyLDCMbtqFzuboigKSSfoAWKqbeoz30Fuv9nWSXdw77Qss/kxoMElnbDEDjHyqxyRwBlgAXKKwNN17UL/AE/Ud2jeVqthdG0ktBdK0bMQjK4lwP3ZSRGJ27gNw2kgAyaLrV9e6pqGl6ppiWV5ZpFKDDc+fFNFJuCsrFVYENHIpBUdARkGgDbooooAxPGUE114G8QW9vE808um3KRxxqWZ2MTAAAckk9qp+OtW1fSdDg/sW1nkubu6jtXuIbV7k2UbZ3T+UoJfaBwOmSOvQ9PRQBzljLYJ4bvJbe31idHc/a5HtpoLuZiFDy4ZUckKRjyxwFCxj5VUV/CcE0Oqaq9tFqKaLMkD2zaipErzfOsp/efvyMLEAZueML8gWurooAKKKKAP/9k="
           );
           const isImgZoom1 = ref(true);
+
+          let textIn1s = "";
+          let textIn1sInterval = null;
+          const textIn1sLength = ref(0);
+          let textIn1sSeconds = 0;
 
           // 监听图片理解选项变化，自动更新问题
           watch(
@@ -394,6 +403,13 @@
                   return;
                 }
 
+                textIn1sInterval = setInterval(() => {
+                  if (textIn1sSeconds > 0) {
+                    textIn1sLength.value = (textIn1s.length / textIn1sSeconds).toFixed(2);
+                  }
+                  textIn1sSeconds += 0.2;
+                }, 200);
+
                 const reader = response.body.getReader();
                 const decoder = new TextDecoder("utf-8");
                 let buffer = "";
@@ -404,16 +420,16 @@
                   if (done) {
                     // 请求成功后保存数据
                     saveToStorage();
+                    clearInterval(textIn1sInterval);
+                    textIn1sSeconds = 0;
+                    textIn1s = "";
                     return;
                   }
 
-                  buffer += decoder.decode(value, { stream: true });
+                  buffer = decoder.decode(value, { stream: true });
 
                   // 按行分割处理
                   const lines = buffer.split("\n");
-                  if (lines.length > 1) {
-                    buffer = lines.pop() || ""; // 保留未完成的最后一行
-                  }
 
                   for (let i = 0; i < lines.length; i++) {
                     const line = lines[i].trim();
@@ -425,6 +441,9 @@
                       if (dataStr === "[DONE]") {
                         // 请求成功后保存数据
                         saveToStorage();
+                        clearInterval(textIn1sInterval);
+                        textIn1sSeconds = 0;
+                        textIn1s = "";
                         return;
                       }
 
@@ -438,8 +457,10 @@
                         if (chunk.choices[0].delta?.reasoning_content != null) {
                           resultText.value +=
                             chunk.choices[0].delta.reasoning_content;
+                          textIn1s += chunk.choices[0].delta.reasoning_content;
                         } else if (chunk.choices[0].delta?.content != null) {
                           resultText.value += chunk.choices[0].delta.content;
+                          textIn1s += chunk.choices[0].delta.content;
                         }
                         scrollResultTextToBottom();
                       } catch (e) {
@@ -473,7 +494,6 @@
               loading.value = false;
             }
           };
-
           // 组件挂载时加载本地存储
           onMounted(() => {
             loadFromStorage();
@@ -498,6 +518,7 @@
             loading,
             testImage,
             isImgZoom1,
+            textIn1sLength,
             handleImageUpload,
             sendRequest,
             toggleZoom1,
