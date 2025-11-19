@@ -4,15 +4,37 @@ from api_defines.bee.models.chat_result import (
     ChatStreamChunkResult as BeeChatStreamChunkResult,
 )
 from services import env_service
-import os
+from services.log_service import logger
+import random
+
+urls=[]
+
+async def set_urls():
+    global urls
+    if len(urls) > 0:
+        return
+    
+    env_urls=env_service.get_chat_url()
+    urls=env_urls.split(";")
+    logger.info(f"ocr urls: {urls}")
+
+async def get_url():
+    url=random.choice(urls)
+    return url
+
+async def init():
+    """
+    初始化函数
+    """
+    await set_urls()
 
 async def get_request_url(args:BeeChatArgs):
     if args.model =="qwen3-32b":
-        url=os.getenv('bee_chat_url_1', 'http://localhost/v1/chat/completions')
+        url=env_service.get_env('bee_chat_url_1')
     elif args.model =="qwen3-14b":
-        url=os.getenv('bee_chat_url_2', 'http://localhost/v1/chat/completions')
+        url=env_service.get_env('bee_chat_url_2')
     else:
-        url=env_service.get_chat_url()
+        url=await get_url()
     return url
 
 async def get_request_headers(token: str):
