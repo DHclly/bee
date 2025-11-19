@@ -1,10 +1,37 @@
 from api_defines.bee.models.rerank_args import RerankArgs as BeeRerankArgs
 from api_defines.bee.models.rerank_result import RerankResult as BeeRerankResult
 from services import env_service
+from services.log_service import logger
+import random
 
+urls=[]
+
+async def set_urls():
+    global urls
+    if len(urls) > 0:
+        return
+    
+    env_urls=env_service.get_rerank_url()
+    urls=env_urls.split(";")
+    logger.info(f"rerank urls: {urls}")
+
+async def get_url():
+    url=random.choice(urls)
+    return url
 
 async def get_request_url(args:BeeRerankArgs):
-    url=env_service.get_rerank_url()
+    """
+    获取请求 URL 函数
+    """
+    global urls
+    if len(urls) == 0:
+        await set_urls()
+        
+    if len(urls) == 0:
+        raise ValueError("rerank urls is empty")
+        
+    url=await get_url()
+    return urlvice.get_rerank_url()
     return url
 
 async def get_request_headers(token: str):
