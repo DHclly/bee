@@ -52,11 +52,12 @@ async def rerank(args:BeeRerankArgs,token: str)->BeeRerankResult | APIErrorResul
 
 def pre_process_args(args:BeeRerankArgs)->BeeRerankArgs:
     doc_len=len(args.documents)
-    top_n=args.top_n
-    if top_n is None:
-        return args
+    args.top_n
     
-    if top_n>=doc_len or top_n<=0:
+    if args.top_n is None:
         args.top_n=doc_len
-    
+    elif args.top_n>doc_len or args.top_n<0:
+        args.top_n=doc_len
+    else:
+        pass
     return args
