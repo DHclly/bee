@@ -101,10 +101,7 @@
               <figure
                 @click="toggleZoom1"
                 class="image"
-                style="
-                  border: 1px solid #000;
-                  margin-right: 10px;
-                "
+                style="border: 1px solid #000; margin-right: 10px"
               >
                 <img
                   :src="ocrImage"
@@ -201,7 +198,7 @@
           const address = ref("");
           const key = ref("");
           const modelName = ref("");
-          const beeName = ref("http://bee:8090");
+          const beeName = ref("");
           const question = ref("");
           const resultText = ref("");
           const resultTextTextarea = ref(null);
@@ -210,8 +207,8 @@
           const showBeeNameTip = ref(false);
           const showQuestionTip = ref(false);
           const loading = ref(false);
-          const ocrImage = ref("/static/home/256x256.png");
-          const ocrServerImage = ref(beeName.value + ocrImage.value);
+          const ocrImage = ref("");
+          const ocrServerImage = ref("");
           const isImgZoom1 = ref(true);
 
           let file_id = "";
@@ -237,7 +234,9 @@
             key: "ocr_key",
             modelName: "ocr_modelName",
             question: "ocr_question",
-            resultText: "ocr_result_text",
+            resultText: "ocr_resultText",
+            beeName: "ocr_beeName",
+            ocrImage: "ocr_ocrImage"
           };
 
           // 从本地存储加载数据
@@ -252,6 +251,10 @@
               localStorage.getItem(storageKeys.question) || "Free OCR.";
             resultText.value =
               localStorage.getItem(storageKeys.resultText) || "";
+            beeName.value =
+              localStorage.getItem(storageKeys.beeName) || "http://bee:8090";
+            ocrImage.value =
+              localStorage.getItem(storageKeys.ocrImage) || "/static/home/256x256.png";
           };
 
           // 只在请求成功后保存数据到本地存储
@@ -261,6 +264,8 @@
             localStorage.setItem(storageKeys.modelName, modelName.value);
             localStorage.setItem(storageKeys.question, question.value);
             localStorage.setItem(storageKeys.resultText, resultText.value);
+            localStorage.setItem(storageKeys.beeName, beeName.value);
+            localStorage.setItem(storageKeys.ocrImage, ocrImage.value);
           };
 
           // 处理图片上传并转为 base64
