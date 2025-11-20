@@ -1,5 +1,7 @@
-from api_defines.bee.models.rerank_args import RerankArgs as BeeRerankArgs
-from api_defines.bee.models.rerank_result import RerankResult as BeeRerankResult
+from api_defines.bee.models.embeddings_args import EmbeddingsArgs as BeeEmbeddingsArgs
+from api_defines.bee.models.embeddings_result import (
+    EmbeddingsResult as BeeEmbeddingsResult,
+)
 from services import env_service
 from services.log_service import logger
 import random
@@ -11,9 +13,9 @@ async def set_urls():
     if len(urls) > 0:
         return
     
-    env_urls=env_service.get_rerank_url()
+    env_urls=env_service.get_embeddings_url()
     urls=env_urls.split(";")
-    logger.info(f"rerank urls: {urls}")
+    logger.info(f"embeddings urls: {urls}")
 
 async def get_url():
     url=random.choice(urls)
@@ -24,8 +26,8 @@ async def init():
     初始化函数
     """
     await set_urls()
-
-async def get_request_url(args:BeeRerankArgs):
+    
+async def get_request_url(args:BeeEmbeddingsArgs):
     """
     获取请求 URL 函数
     """
@@ -34,7 +36,7 @@ async def get_request_url(args:BeeRerankArgs):
         await set_urls()
         
     if len(urls) == 0:
-        raise ValueError("rerank urls is empty")
+        raise ValueError("embeddings urls is empty")
         
     url=await get_url()
     return url
@@ -59,11 +61,11 @@ async def get_request_headers(token: str):
     }
     return headers
 
-async def get_request_args(args:BeeRerankArgs)->dict:
+async def get_request_args(args:BeeEmbeddingsArgs)->dict:
     """OpenAI格式参数转为当前对接平台的参数格式
 
     Args:
-        args (BeeRerankArgs): 请求参数对象
+        args (BeeEmbeddingsArgs): 请求参数对象
 
     Returns:
         dict: 当前对接平台的参数格式的字典对象
@@ -72,79 +74,69 @@ async def get_request_args(args:BeeRerankArgs)->dict:
     """
     openai 参数完整格式参考:
     {
-        "model": "bge-reranker-v2-m3",
-        "query": "苹果",
-        "documents": [
+        "model": "bge-m3",
+        "input": [
             "apple",
             "苹果",
             "iPhone"
-        ],
-        "top_n": 10,
-        "return_documents": false
+        ]
     }
     """
-    args_json=args.model_dump()
     # 组装为当前对接平台的参数格式
+    args_json=args.model_dump()
     # args_dict={
     #     "model": args_json["model"],
-    #     "query": args_json["query"],
-    #     "documents": args_json["documents"],
-    #     "top_n": args_json["top_n"],
-    #     "return_documents": args_json["return_documents"]
+    #     "input": args_json["input"],
     # }
     args_dict=args_json
     return args_dict
 
-async def get_request_result(result:dict)->BeeRerankResult:
+async def get_request_result(result:dict)->BeeEmbeddingsResult:
     """获取请求结果，转换为OpenAI格式
 
     Args:
         result (dict): 请求参数对象
 
     Returns:
-        BeeRerankResult: 返回的OpenAI格式的结果对象
+        BeeEmbeddingsResult: 返回的OpenAI格式的结果对象
     """
     
     """
     openai 返回结果完整格式参考:
     {
-        "id": "rerank-e250b804eb174366ae77617bfeae3a65",
-        "model": "jina-reranker-v2-base-multilingual",
-        "usage": {
-            "total_tokens": 22
-        },
-        "results": [
+        "id": "embd-408a45bc9703448d8926afe881821cbb",
+        "object": "list",
+        "created": 1750905855,
+        "model": "bge-m3",
+        "data": [
             {
-            "index": 1,
-            "document": {
-                "text": "苹果"
-            },
-            "relevance_score": 0.890625
+                "index": 0,
+                "object": "embedding",
+                "embedding": [-0.05364990234375, 0.005130767822265625, -0.031585693359375]
             },
             {
-            "index": 2,
-            "document": {
-                "text": "iPhone"
-            },
-            "relevance_score": 0.6796875
-            },
-            {
-            "index": 0,
-            "document": {
-                "text": "apple"
-            },
-            "relevance_score": 0.62890625
+                "index": 1,
+                "object": "embedding",
+                "embedding": [-0.0276947021484375, 0.009765625, -0.037353515625]
             }
-        ]
+        ],
+        "usage": {
+            "prompt_tokens": 6,
+            "total_tokens": 6,
+            "completion_tokens": 0,
+            "prompt_tokens_details": None
+        }
     }
     """
     
     # result_dict = {
     #     "id": result["id"],
+    #     "object": result["object"],
+    #     "created": result["created"],
     #     "model": result["model"],
     #     "usage": result["usage"],
-    #     "results": result["results"]
+    #     "data": result["data"]
     # }
     result_dict=result
-    result_obj = BeeRerankResult(**result_dict)
+    result_obj = BeeEmbeddingsResult(**result_dict)
     return result_obj

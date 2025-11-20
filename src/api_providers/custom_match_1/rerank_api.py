@@ -19,12 +19,6 @@ async def get_url():
     url=random.choice(urls)
     return url
 
-async def init():
-    """
-    初始化函数
-    """
-    await set_urls()
-
 async def get_request_url(args:BeeRerankArgs):
     """
     获取请求 URL 函数
@@ -85,14 +79,16 @@ async def get_request_args(args:BeeRerankArgs)->dict:
     """
     args_json=args.model_dump()
     # 组装为当前对接平台的参数格式
-    # args_dict={
-    #     "model": args_json["model"],
-    #     "query": args_json["query"],
-    #     "documents": args_json["documents"],
-    #     "top_n": args_json["top_n"],
-    #     "return_documents": args_json["return_documents"]
-    # }
-    args_dict=args_json
+    args_dict={
+        "input": {
+            "query": args_json["query"],
+            "documents": args_json["documents"]
+        },
+        "parameters": {
+            "return_documents": args_json["return_documents"],
+            "top_n": args_json["top_n"],
+        }
+    }
     return args_dict
 
 async def get_request_result(result:dict)->BeeRerankResult:
@@ -139,12 +135,11 @@ async def get_request_result(result:dict)->BeeRerankResult:
     }
     """
     
-    # result_dict = {
-    #     "id": result["id"],
-    #     "model": result["model"],
-    #     "usage": result["usage"],
-    #     "results": result["results"]
-    # }
-    result_dict=result
+    result_dict={
+        "id": result["request_id"],
+        "model": "bge-reranker-v2-m3",
+        "usage": result["usage"],
+        "results": result["output"]["results"]
+    }
     result_obj = BeeRerankResult(**result_dict)
     return result_obj

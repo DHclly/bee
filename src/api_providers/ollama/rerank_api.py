@@ -19,6 +19,12 @@ async def get_url():
     url=random.choice(urls)
     return url
 
+async def init():
+    """
+    初始化函数
+    """
+    await set_urls()
+
 async def get_request_url(args:BeeRerankArgs):
     """
     获取请求 URL 函数

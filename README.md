@@ -65,6 +65,17 @@ docker run -d --name=bee \
   -p 8090:80 \
   dhclly/bee:v1.2.1-amd64
 
+# 快速挂载一个新的渠道的示例
+docker run -d --name=bee \
+  --security-opt seccomp=unconfined \
+  --cap-add=SYS_PTRACE \
+  -e bee_embeddings_url=http://localhost/v1/embeddings \
+  -e bee_rerank_url=http://localhost/v1/rerank \
+  -e bee_chat_url=http://localhost/v1/chat/completions \
+  -e bee_provider_type=custom_match_1 \
+  -v /data/api_providers/custom_match_1:/app/bee/api_providers/custom_match_1
+  -p 8090:80 \
+  dhclly/bee:v1.3.0-amd64
 ```
 
 访问地址：http://localhost:8090
