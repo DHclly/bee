@@ -227,13 +227,17 @@ def get_logger(print_start: bool = True, server_name: str = "", log_base_path: s
     )
 
     # 创建日志文件路径
+    pid=""
+    bee_workers=int(env_service.get_bee_workers())
+    if bee_workers>1:
+        pid=f".{os.getpid()}"
     log_folder_path = os.path.join(inner_log_base_path, "logs")
-    log_file_path = os.path.join(log_folder_path, f"{inner_server_name}.log")
+    log_file_path = os.path.join(log_folder_path, f"{inner_server_name}{pid}.log")
     log_level = _get_log_level()
 
     # 创建日志文件夹
     if not os.path.exists(log_folder_path):
-        os.makedirs(log_folder_path)
+        os.makedirs(log_folder_path, exist_ok=True)
 
     # 定义日志文件大小和备份数量
     max_file_size = 2 * 1024 * 1024  # 2 MB

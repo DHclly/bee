@@ -43,5 +43,8 @@ def get_show_redoc():
 def get_log_level():
     return os.getenv('bee_log_level', 'info')
 
+def get_bee_workers():
+    return os.getenv('bee_workers', '1')
+
 def get_env(env_name):
     return os.getenv(env_name, '')

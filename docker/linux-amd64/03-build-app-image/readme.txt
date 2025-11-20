@@ -4,6 +4,7 @@
 
 # 2025.11.20
 
+docker build --platform linux/amd64 --pull=false --tag bee/bee:v1.3.3-amd64 --file docker/linux-amd64/03-build-app-image/Dockerfile .
 docker build --platform linux/amd64 --pull=false --tag bee/bee:v1.3.0-amd64 --file docker/linux-amd64/03-build-app-image/Dockerfile .
 
 
