@@ -433,7 +433,7 @@
                   
                   // 重要，处理特殊场景下，返回的数据块不完整问题
                   if (lines.length > 1) {
-                    buffer = buffer.pop() || ''; // 保留不完整尾部
+                    buffer = lines.pop() || ''; // 保留不完整尾部
                   }
 
                   for (let i = 0; i < lines.length; i++) {
