@@ -2,6 +2,9 @@
 
 # 构建构建镜像命令，命令在 bee 目录下执行
 
+# 2026.01.04
+docker build --platform linux/arm64 --pull=false --tag bee/bee:v1.3.6-arm64 --file docker/linux-arm64/03-build-app-image/Dockerfile .
+
 # 2025.11.17
 
 docker build --platform linux/arm64 --pull=false --tag bee/bee:v1.2.2-arm64 --file docker/linux-arm64/03-build-app-image/Dockerfile .
