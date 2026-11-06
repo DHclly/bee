@@ -3,7 +3,10 @@
 ## 使用 uv 为现有项目创建 Python 3.13 虚拟环境
 
 ```bash
-# 1. 在项目根目录创建虚拟环境（指定 Python 3.13）
+# 0. 进入源码目录（uv 相关配置、pyproject.toml、uv.lock 都在 src 下）
+cd src
+
+# 1. 创建虚拟环境（指定 Python 3.13）
 uv venv --python 3.13
 
 # 2. 激活虚拟环境
@@ -26,6 +29,7 @@ uv run main.py
 
 ### 说明
 
+- 所有命令均在 `src/` 目录下执行，与 `build`、`deploy`、`docs` 等运维目录互不干扰，虚拟环境也只生成在 `src/.venv`。
 - `uv venv --python 3.13` 会使用 uv 已管理的 Python 3.13；若本机没有，uv 会自动下载。
 - `uv sync` 依据现有的 `pyproject.toml` / `uv.lock` 安装锁定版本的依赖。
 - 若项目仅有 `requirements.txt`：先 `uv venv --python 3.13`，再 `uv pip install -r requirements.txt`。
