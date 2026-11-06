@@ -3,7 +3,7 @@ name = "bee"
 version = "1.0.0"
 description = "Welcome to Bee, a lightweight LLM API proxy."
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.13"
 dependencies = [
     "annotated-types==0.7.0",
     "anyio==4.10.0",

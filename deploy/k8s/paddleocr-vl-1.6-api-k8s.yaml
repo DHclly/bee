@@ -1,0 +1,83 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: paddleocr-vl-api-runner
+  namespace: edoc2
+  labels:
+    app: paddleocr-vl-api-runner
+    k8s-app: paddleocr-vl-api-runner
+spec:
+  selector:
+    matchLabels:
+      app: paddleocr-vl-api-runner
+  replicas: 1
+  revisionHistoryLimit: 5
+  # 支持多副本；滚动更新时先停旧再起新，不额外占用显存
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        app: paddleocr-vl-api-runner
+    spec:
+      containers:
+      # Web 界面与接口服务，容器内自带 paddlex
+      - name: api
+        image: dev.registry.edoc2.com/edoc2v5/paddleocr-vl-1.6-api:v1.0.0-x86_64
+        ports:
+        - containerPort: 8000
+          name: http
+          protocol: TCP
+        env:
+          - name: CUDA_DEVICE_ORDER
+            value: "PCI_BUS_ID"
+          - name: NVIDIA_VISIBLE_DEVICES
+            value: "all"
+          - name: CUDA_VISIBLE_DEVICES
+            value: "0"
+          - name: INWISEAI_PROCESS_VRAM
+            value: "1"
+        # 健康检查里会实际请求 server，等它加载完成后再判定就绪
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+            scheme: HTTP
+          initialDelaySeconds: 300
+          periodSeconds: 30
+          timeoutSeconds: 20
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+            scheme: HTTP
+          initialDelaySeconds: 300
+          periodSeconds: 10
+          timeoutSeconds: 20
+          failureThreshold: 3
+      enableServiceLinks: false
+      # 显卡只在特定服务器上，需要时约束到带该标签的节点
+      # nodeSelector:
+      #   node.labels.nodetype: Indrive
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: paddleocr-vl-api-runner
+  namespace: edoc2
+  labels:
+    app: paddleocr-vl-api-runner
+spec:
+  ports:
+  - name: http
+    port: 8220
+    targetPort: 8000
+    nodePort: 32200
+    protocol: TCP
+  selector:
+    app: paddleocr-vl-api-runner
+  type: NodePort

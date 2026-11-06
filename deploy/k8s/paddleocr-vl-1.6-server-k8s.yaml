@@ -1,0 +1,92 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: paddleocr-vl-server-runner
+  namespace: edoc2
+  labels:
+    app: paddleocr-vl-server-runner
+    k8s-app: paddleocr-vl-server-runner
+spec:
+  selector:
+    matchLabels:
+      app: paddleocr-vl-server-runner
+  replicas: 1
+  revisionHistoryLimit: 5
+  # 支持多副本；滚动更新时先停旧再起新，不额外占用显存
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        app: paddleocr-vl-server-runner
+    spec:
+      containers:
+      # 推理服务，api 内的 paddlex 通过 Service 名访问它
+      - name: server
+        image: dev.registry.edoc2.com/edoc2v5/paddleocr-vl-1.6-server:v1.0.0-x86_64
+        ports:
+        - containerPort: 8000
+          name: vllm
+          protocol: TCP
+        env:
+          - name: CUDA_DEVICE_ORDER
+            value: "PCI_BUS_ID"
+          - name: NVIDIA_VISIBLE_DEVICES
+            value: "all"
+          - name: CUDA_VISIBLE_DEVICES
+            value: "0"
+          - name: INWISEAI_PROCESS_VRAM
+            value: "8"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+            scheme: HTTP
+          # 模型加载耗时较长，首检延后 5 分钟
+          initialDelaySeconds: 300
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+            scheme: HTTP
+          initialDelaySeconds: 300
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        # 模型加载与推理依赖共享内存，需放大默认的 64MB
+        volumeMounts:
+        - name: shm
+          mountPath: /dev/shm
+      volumes:
+      - name: shm
+        emptyDir:
+          medium: Memory
+          sizeLimit: 8Gi
+      enableServiceLinks: false
+      # 显卡只在特定服务器上，需要时约束到带该标签的节点
+      # nodeSelector:
+      #   node.labels.nodetype: Indrive
+---
+# 服务名即 api 内 paddlex 访问 vllm 的主机名，需保持 paddleocr-vl-server-runner
+apiVersion: v1
+kind: Service
+metadata:
+  name: paddleocr-vl-server-runner
+  namespace: edoc2
+  labels:
+    app: paddleocr-vl-server-runner
+spec:
+  ports:
+  - name: vllm
+    port: 8000
+    targetPort: 8000
+    protocol: TCP
+  selector:
+    app: paddleocr-vl-server-runner
+  type: ClusterIP

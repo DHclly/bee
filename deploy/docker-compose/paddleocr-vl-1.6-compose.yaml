@@ -1,0 +1,52 @@
+version: '3.5'
+
+services:
+  server:
+    image: dev.registry.edoc2.com/edoc2v5/paddleocr-vl-1.6-server:v1.0.0-x86_64
+    hostname: paddleocr-vl-server-runner
+    # api 内的 paddlex 通过这个名字访问 vllm，容器名需固定
+    container_name: paddleocr-vl-server-runner
+    # 推理需访问宿主 GPU，放开 seccomp 并保留调试能力
+    security_opt:
+      - seccomp=unconfined
+    cap_add:
+      - SYS_PTRACE
+    ports:
+      - "8219:8000"
+    networks:
+      - ocr-net
+    environment:
+      - CUDA_DEVICE_ORDER=PCI_BUS_ID
+      - NVIDIA_VISIBLE_DEVICES=all
+      - CUDA_VISIBLE_DEVICES=0
+      - INWISEAI_PROCESS_VRAM=8
+    # 模型加载与推理依赖共享内存，需放大默认的 64MB
+    shm_size: "8g"
+    restart: unless-stopped
+
+  api:
+    image: dev.registry.edoc2.com/edoc2v5/paddleocr-vl-1.6-api:v1.0.0-x86_64
+    hostname: paddleocr-vl-api-runner
+    container_name: paddleocr-vl-api-runner
+    security_opt:
+      - seccomp=unconfined
+    cap_add:
+      - SYS_PTRACE
+    ports:
+      # 8220 为 Web 界面与接口，paddlex 仅在容器内使用，不对外暴露
+      - "8220:8000"
+    networks:
+      - ocr-net
+    environment:
+      - CUDA_DEVICE_ORDER=PCI_BUS_ID
+      - NVIDIA_VISIBLE_DEVICES=all
+      - CUDA_VISIBLE_DEVICES=0
+      - INWISEAI_PROCESS_VRAM=1
+    depends_on:
+      - server
+    restart: unless-stopped
+
+networks:
+  ocr-net:
+    external: true
+    name: ocr-net

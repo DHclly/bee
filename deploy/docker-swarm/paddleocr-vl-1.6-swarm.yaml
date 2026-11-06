@@ -1,0 +1,88 @@
+version: '3.5'
+
+services:
+  # 服务名即 api 内 paddlex 访问 vllm 的主机名，需保持 paddleocr-vl-server-runner
+  paddleocr-vl-server-runner:
+    hostname: paddleocr-vl-server-runner
+    image: dev.registry.edoc2.com/edoc2v5/paddleocr-vl-1.6-server:v1.0.0-x86_64
+    ports:
+      - "8219:8000"
+    networks:
+      - ocr-net
+    cap_add:
+      - SYS_PTRACE
+    environment:
+      - CUDA_DEVICE_ORDER=PCI_BUS_ID
+      - NVIDIA_VISIBLE_DEVICES=all
+      - CUDA_VISIBLE_DEVICES=0
+      - INWISEAI_PROCESS_VRAM=8
+    deploy:
+      # 显卡只在特定服务器上，需要时约束到带该标签的节点
+      # placement:
+      #   constraints:
+      #     - node.labels.nodetype == Indrive
+      replicas: 1
+      # 支持多副本；滚动更新时逐个替换，旧副本停掉后才启动新副本
+      update_config:
+        parallelism: 1
+        delay: 10s
+        order: stop-first
+        failure_action: pause
+      restart_policy:
+        condition: on-failure
+    # 模型加载与推理依赖共享内存，需放大默认的 64MB
+    shm_size: "8g"
+    healthcheck:
+      test: curl -f http://localhost:8000/health || exit 1
+      interval: 30s
+      timeout: 10s
+      # 模型加载耗时较长，启动阶段放宽等待
+      start_period: 5m
+      retries: 3
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "2000k"
+        max-file: "10"
+
+  paddleocr-vl-api-runner:
+    hostname: paddleocr-vl-api-runner
+    image: dev.registry.edoc2.com/edoc2v5/paddleocr-vl-1.6-api:v1.0.0-x86_64
+    ports:
+      # 8220 为 Web 界面与接口，paddlex 仅在容器内使用，不对外暴露
+      - "8220:8000"
+    networks:
+      - ocr-net
+    cap_add:
+      - SYS_PTRACE
+    environment:
+      - CUDA_DEVICE_ORDER=PCI_BUS_ID
+      - NVIDIA_VISIBLE_DEVICES=all
+      - CUDA_VISIBLE_DEVICES=0
+      - INWISEAI_PROCESS_VRAM=1
+    deploy:
+      replicas: 1
+      # 支持多副本；滚动更新时逐个替换，旧副本停掉后才启动新副本
+      update_config:
+        parallelism: 1
+        delay: 10s
+        order: stop-first
+        failure_action: pause
+      restart_policy:
+        condition: on-failure
+    healthcheck:
+      test: curl -f http://localhost:8000/health || exit 1
+      interval: 30s
+      timeout: 10s
+      start_period: 5m
+      retries: 3
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "2000k"
+        max-file: "10"
+
+networks:
+  ocr-net:
+    external: true
+    name: ocr-net
