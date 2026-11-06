@@ -17,3 +17,5 @@ docker/images
 .ruff_cache
 
 file_storage/
+
+uv.lock
