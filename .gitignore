@@ -19,4 +19,5 @@ file_storage/
 
 uv.lock
 
-build/
+# 构建时由脚本拷入的产物
+build/*/*/build-context/app/
