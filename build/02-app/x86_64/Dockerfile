@@ -1,5 +1,4 @@
-ARG BASE_IMAGE=dhclly/bee/bee-base:v2.0.0-x86_64
-FROM ${BASE_IMAGE}
+FROM dhclly/bee/bee-base:v2.0.0-x86_64
 
 # 指定工作目录
 WORKDIR /app
