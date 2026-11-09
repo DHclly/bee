@@ -410,4 +410,9 @@ class ChatArgs(BaseModel):
         description="设置 seed 使文本生成更具确定性。传入相同的 seed 值且其他参数不变时，模型将尽可能返回相同结果。取值范围：0 到 2^31 - 1。",
         examples=[None]
     )
+    reasoning_effort: str | None = Field(
+        default=None,
+        description="推理强度，用于控制模型在推理类任务上的思考投入程度，如 low、medium、high。",
+        examples=["high"]
+    )
     
