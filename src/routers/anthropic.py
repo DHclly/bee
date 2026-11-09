@@ -1,8 +1,11 @@
 from fastapi import APIRouter, Depends
 from fastapi.responses import StreamingResponse
 
+from typing import Union
+
 from api_defines.bee.anthropic_api import anthropic_messages
 from api_defines.bee.models.anthropic_args import AnthropicArgs
+from api_defines.bee.models.anthropic_result import AnthropicResult as BeeAnthropicResult
 from api_defines.bee.models.error_result import APIErrorResult
 from services.auth_service import get_bearer_token
 
@@ -20,7 +23,7 @@ router = APIRouter()
 - 支持流式响应（设置 `stream=True`）
 - 流式时原样透传 Anthropic 的 SSE 事件
 """,
-             response_model=dict | APIErrorResult,
+             response_model=Union[BeeAnthropicResult,APIErrorResult],
              responses={
                  200: {
                      "description": "成功返回 Messages 结果",
@@ -54,5 +57,5 @@ data: {"type":"message_stop"}
                      }
                  }
              })
-async def messages(args: AnthropicArgs, token: str = Depends(get_bearer_token)) -> dict | StreamingResponse | APIErrorResult:
+async def messages(args: AnthropicArgs, token: str = Depends(get_bearer_token)) -> BeeAnthropicResult | StreamingResponse | APIErrorResult:
     return await anthropic_messages(args, token)

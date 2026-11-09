@@ -1,4 +1,8 @@
 from api_defines.bee.models.anthropic_args import AnthropicArgs
+from api_defines.bee.models.anthropic_result import (
+    AnthropicResult as BeeAnthropicResult,
+    AnthropicStreamChunkResult as BeeAnthropicStreamChunkResult,
+)
 from services import env_service
 from services.log_service import logger
 import random
@@ -104,14 +108,14 @@ async def get_request_args(args:AnthropicArgs)->dict:
     return args_dict
 
 
-async def get_request_result(result:dict)->dict:
+async def get_request_result(result:dict)->BeeAnthropicResult:
     """获取请求结果，转换为 Anthropic Messages API 格式
 
     Args:
         result (dict): 请求参数对象
 
     Returns:
-        dict: 返回的 Anthropic Messages API 格式的结果对象
+        BeeAnthropicResult: 返回的 Anthropic Messages API 格式的结果对象
     """
 
     """
@@ -145,29 +149,26 @@ async def get_request_result(result:dict)->dict:
     #     "usage": result["usage"]
     # }
     result_dict=result
-    return result_dict
+    result_obj = BeeAnthropicResult(**result_dict)
+    return result_obj
 
 
-async def get_request_stream_chunk_result(result:dict)->dict:
+async def get_request_stream_chunk_result(result:dict)->BeeAnthropicStreamChunkResult:
     """获取流式请求块结果，转换为 Anthropic Messages API 格式
 
     Args:
         result (dict): 单个 SSE 事件
 
     Returns:
-        dict: 返回的 Anthropic Messages API 格式的流式结果对象
+        BeeAnthropicStreamChunkResult: 返回的 Anthropic Messages API 格式的流式结果对象
     """
 
     """
     Anthropic 流式事件完整格式参考:
-    event: content_block_delta
-    data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"你好"}}
-
-    event: message_delta
-    data: {"type":"message_delta","delta":{"stop_reason":"end_turn"},"usage":{"output_tokens":20}}
-
-    event: message_stop
-    data: {"type":"message_stop"}
+    {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"你好"}}
+    {"type":"message_delta","delta":{"stop_reason":"end_turn"},"usage":{"output_tokens":20}}
+    {"type":"message_stop"}
     """
     result_dict=result
-    return result_dict
+    result_obj = BeeAnthropicStreamChunkResult(**result_dict)
+    return result_obj
