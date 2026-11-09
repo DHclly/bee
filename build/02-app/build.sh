@@ -69,6 +69,7 @@ for item in "${copy_items[@]}"; do
 done
 
 tag="dev.registry.edoc2.com/edoc2v5/paddleocr-vl-1.6-server:v${version}-${cpu_arch}"
+base_image="dhclly/bee/bee-base:v${version}-${cpu_arch}"
 
 log "准备构建上下文: ${app_dir}"
 for item in "${copy_items[@]}"; do
@@ -87,6 +88,7 @@ export DOCKER_BUILDKIT=1
 
 docker build \
     -f "$dockerfile" \
+    --build-arg "BASE_IMAGE=${base_image}" \
     -t "$tag" \
     "$build_context" || fail "镜像构建失败"
 

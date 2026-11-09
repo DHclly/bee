@@ -1,4 +1,5 @@
-FROM bee/bee-publish:v1.0.1-arm64
+ARG BASE_IMAGE=dhclly/bee/bee-base:v2.0.0-aarch64
+FROM ${BASE_IMAGE}
 
 # 指定工作目录
 WORKDIR /app
