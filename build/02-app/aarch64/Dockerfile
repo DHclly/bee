@@ -1,4 +1,4 @@
-FROM bee/bee-build:v1.0.1-arm64 AS build
+FROM dhclly/bee/bee-base:v2.0.0-aarch64 AS build
 
 # 指定工作目录
 WORKDIR /app/bee
