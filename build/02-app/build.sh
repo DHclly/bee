@@ -49,9 +49,6 @@ app_dir="${build_context}/app"
 # 从 src 拷入 app 目录的清单：文件或目录，路径相对 src
 copy_items=(
     main.py
-    pyproject.toml
-    uv.toml
-    .ruff.toml
     .env.example
     .env.required
     api_defines
