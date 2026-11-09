@@ -3,8 +3,8 @@
 # 提高脚本健壮性：出错停止、未定义变量报错、管道错误传播
 set -euo pipefail  
 
-cd /app/bee
-source .venv/bin/activate
+cd /app
+source /app/.venv/bin/activate
 
 echo "Starting Bee..."
 echo "Welcome to Bee, a lightweight LLM API proxy."
