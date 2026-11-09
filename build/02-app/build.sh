@@ -50,7 +50,6 @@ app_dir="${build_context}/app"
 copy_items=(
     main.py
     .env.example
-    .env.required
     api_defines
     api_providers
     bee_version
