@@ -50,7 +50,6 @@ app_dir="${build_context}/app"
 copy_items=(
     main.py
     pyproject.toml
-    uv.lock
     uv.toml
     .ruff.toml
     .env.example
