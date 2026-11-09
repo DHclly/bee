@@ -1,1 +1,0 @@
-from . import ocr_api as ocr_api
