@@ -58,24 +58,31 @@ copy_items=(
     static
 )
 
+# 前置检查：Dockerfile、源码目录、README 以及上下文中的入口文件必须存在
 [ -f "$dockerfile" ] || fail "Dockerfile 不存在: ${dockerfile}"
 [ -d "$src_dir" ] || fail "源码目录不存在: ${src_dir}"
 [ -f "${repo_root}/README.md" ] || fail "缺少 ${repo_root}/README.md"
 [ -f "${app_dir}/tini" ] || fail "缺少 ${app_dir}/tini"
 [ -f "${app_dir}/docker-entrypoint.sh" ] || fail "缺少 ${app_dir}/docker-entrypoint.sh"
 
+# 清单中的每一项都必须在 src 下存在，提前报错，避免拷到一半才失败
 for item in "${copy_items[@]}"; do
     [ -e "${src_dir}/${item}" ] || fail "缺少 ${src_dir}/${item}"
 done
 
 tag="dev.registry.edoc2.com/edoc2v5/paddleocr-vl-1.6-server:v${version}-${cpu_arch}"
 
+# 准备构建上下文：先删掉上次遗留的同名内容，再从 src 拷贝，保证每次都是干净副本
 log "准备构建上下文: ${app_dir}"
 for item in "${copy_items[@]}"; do
     rm -rf "${app_dir:?}/${item}"
     cp -a "${src_dir}/${item}" "${app_dir}/"
 done
+
+# 清理 Python 缓存，避免打进镜像
 find "$app_dir" \( -name '__pycache__' -o -name '*.pyc' -o -name '*.pyo' \) -exec rm -rf {} +
+
+# README 不在 src 下，单独从仓库根目录拷入
 cp "${repo_root}/README.md" "${app_dir}/README.md"
 
 log "runner: ${runner}"
