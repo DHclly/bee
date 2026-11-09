@@ -9,7 +9,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from routers import chat, embeddings, rerank,embed,ocr,asr,tts,file_storage
+from routers import chat, embeddings, rerank,embed,tts
 from services import env_service
 from services.http_service import http_clients
 from jinja2 import Environment, FileSystemLoader
@@ -18,7 +18,7 @@ try:
     with open("bee_version", "r", encoding="utf-8") as bv_file:
         bee_version = bv_file.read().strip()
 except OSError:
-    bee_version = "unknown"
+    bee_version = "0.0.0"
 
 bee_description = "欢迎使用 Bee, 一个轻量级 LLM API 代理"
 
@@ -82,10 +82,7 @@ app.include_router(chat.router)
 app.include_router(embeddings.router)
 app.include_router(rerank.router)
 app.include_router(embed.router)
-app.include_router(ocr.router)
-app.include_router(asr.router)
 app.include_router(tts.router)
-app.include_router(file_storage.router)
 
 @app.get(path="/",include_in_schema=False)
 def home(request: Request):
@@ -100,9 +97,9 @@ def home(request: Request):
     return template_response
     
 @app.get(path="/version",
-         tags=["Default"])
+         tags=["Version"])
 @app.get(path="/v",
-         tags=["Default"],include_in_schema=False)
+         tags=["Version"],include_in_schema=False)
 def version():
     return {
         "description": bee_description,

@@ -18,7 +18,7 @@ class HttpClientManager:
         self.rerank_client = httpx.AsyncClient(timeout=httpx.Timeout(
             connect=3.0,
             read=60.0,
-            write=310.0,
+            write=30.0,
             pool=5.0
         ))
         
