@@ -14,10 +14,11 @@ from services import env_service
 from services.http_service import http_clients
 from jinja2 import Environment, FileSystemLoader
 
-bee_version = "2.0.0"
-
-with open("bee_version", "r", encoding="utf-8") as bv_file:
-    bee_version = bv_file.read().strip()
+try:
+    with open("bee_version", "r", encoding="utf-8") as bv_file:
+        bee_version = bv_file.read().strip()
+except OSError:
+    bee_version = "unknown"
 
 bee_description = "欢迎使用 Bee, 一个轻量级 LLM API 代理"
 
