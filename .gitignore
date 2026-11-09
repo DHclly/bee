@@ -1,7 +1,6 @@
 # Python-generated files
 __pycache__/
 *.py[oc]
-build/
 dist/
 wheels/
 *.egg-info
@@ -19,3 +18,9 @@ docker/images
 file_storage/
 
 uv.lock
+
+# 构建产物，保留构建脚本与 Dockerfile
+build/*
+!build/01-base/
+build/01-base/*/*
+!build/01-base/*/Dockerfile
