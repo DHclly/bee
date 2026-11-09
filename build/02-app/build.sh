@@ -42,11 +42,46 @@ esac
 
 dockerfile="${script_dir}/${cpu_arch}/Dockerfile"
 build_context="${script_dir}/${cpu_arch}/build-context"
+repo_root="$(cd "${script_dir}/../.." && pwd)"
+src_dir="${repo_root}/src"
+app_dir="${build_context}/app"
+
+# 从 src 拷入 app 目录的清单：文件或目录，路径相对 src
+copy_items=(
+    main.py
+    pyproject.toml
+    uv.lock
+    uv.toml
+    .ruff.toml
+    .env.example
+    .env.required
+    api_defines
+    api_providers
+    bee_version
+    routers
+    services
+    static
+)
 
 [ -f "$dockerfile" ] || fail "Dockerfile 不存在: ${dockerfile}"
-[ -d "$build_context" ] || fail "构建上下文不存在: ${build_context}"
+[ -d "$src_dir" ] || fail "源码目录不存在: ${src_dir}"
+[ -f "${repo_root}/README.md" ] || fail "缺少 ${repo_root}/README.md"
+[ -f "${app_dir}/tini" ] || fail "缺少 ${app_dir}/tini"
+[ -f "${app_dir}/docker-entrypoint.sh" ] || fail "缺少 ${app_dir}/docker-entrypoint.sh"
+
+for item in "${copy_items[@]}"; do
+    [ -e "${src_dir}/${item}" ] || fail "缺少 ${src_dir}/${item}"
+done
 
 tag="dev.registry.edoc2.com/edoc2v5/paddleocr-vl-1.6-server:v${version}-${cpu_arch}"
+
+log "准备构建上下文: ${app_dir}"
+for item in "${copy_items[@]}"; do
+    rm -rf "${app_dir:?}/${item}"
+    cp -a "${src_dir}/${item}" "${app_dir}/"
+done
+find "$app_dir" \( -name '__pycache__' -o -name '*.pyc' -o -name '*.pyo' \) -exec rm -rf {} +
+cp "${repo_root}/README.md" "${app_dir}/README.md"
 
 log "runner: ${runner}"
 log "版本: ${version}"

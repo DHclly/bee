@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="shortcut icon" href="/static/redoc/favicon.png" />
+    <link rel="stylesheet" href="/static/home/bulma.min.css" />
+    <style>
+      .column-title {
+        font-size: 26px;
+        font-weight: bold;
+      }
+
+      .img-zoom-1 {
+        max-width: 200px;
+        max-height: 200px;
+      }
+    </style>
+    <title>OCR</title>
+  </head>
+  <body>
+    <div class="container is-fluid" id="app">
+      <section class="hero is-warning">
+        <div class="hero-body">
+          <h1 class="title">光学字符识别接口 OCR</h1>
+          <h2 class="subtitle">光学字符识别接口，提供图片文字识别能力</h2>
+        </div>
+      </section>
+      <div class="columns is-desktop" style="margin-top: 20px">
+        <div class="column">
+          <h2 class="column-title">请求参数：</h2>
+          <div class="field">
+            <label class="label">模型地址：</label>
+            <div class="control">
+              <input
+                v-model="address"
+                class="input is-warning"
+                type="text"
+                placeholder="http://localhost:8000/ocr"
+                autocomplete="off"
+              />
+            </div>
+          </div>
+          <div class="notification is-warning" v-show="showAddressTip">
+            请求地址不能为空
+          </div>
+
+          <div class="field">
+            <label class="label">模型秘钥：</label>
+            <div class="control">
+              <input
+                v-model="key"
+                class="input is-warning"
+                type="text"
+                placeholder="sk-123456"
+              />
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="label">模型名称：</label>
+            <div class="control">
+              <input
+                v-model="modelName"
+                class="input is-warning"
+                type="text"
+                placeholder="deepseek-ocr"
+              />
+            </div>
+            <p class="help is-warning">
+              常见 OCR 模型：deepseek-ocr, paddleocr, paddleocr-vl
+            </p>
+          </div>
+          <div class="notification is-warning" v-show="showModelNameTip">
+            模型名称不能为空
+          </div>
+
+          <div class="field">
+            <label class="label">OCR 服务访问当前服务的基础地址：</label>
+            <div class="control">
+              <input
+                v-model="beeName"
+                class="input is-warning"
+                type="text"
+                placeholder="http://localhost:8000"
+              />
+            </div>
+            <p class="help is-warning">
+              上传后进行 OCR
+              识别的图片存储在当前服务上，因此需要提供当前服务能够给OCR服务访问的基础地址
+            </p>
+          </div>
+          <div class="notification is-warning" v-show="showBeeNameTip">
+            基础地址不能为空
+          </div>
+
+          <div class="field test-img">
+            <label class="label">识别图片：</label>
+            <div class="control is-flex is-align-items-center">
+              <!-- 原图展示 -->
+              <figure
+                @click="toggleZoom1"
+                class="image"
+                style="border: 1px solid #000; margin-right: 10px"
+              >
+                <img
+                  :src="ocrImage"
+                  :class="{ 'img-zoom-1': isImgZoom1 }"
+                  alt="Ocr Image"
+                />
+              </figure>
+
+              <!-- 上传按钮 -->
+              <div class="file is-normal is-boxed">
+                <label class="file-label">
+                  <input
+                    class="file-input"
+                    type="file"
+                    accept="image/*"
+                    @change="handleImageUpload"
+                  />
+                  <span class="file-cta">
+                    <span class="file-label"> 上传识别图片 </span>
+                  </span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="label">OCR 服务访问图片 URL：</label>
+            <div class="control">
+              <input
+                v-model="ocrServerImage"
+                class="input is-warning"
+                type="text"
+                placeholder=""
+              />
+            </div>
+          </div>
+
+          <div class="notification is-warning" v-show="showModelNameTip">
+            模型名称不能为空
+          </div>
+
+          <div class="field">
+            <label class="label">OCR 提示词：</label>
+            <div class="control">
+              <textarea
+                v-model="question"
+                class="textarea is-warning"
+                rows="4"
+                placeholder="OCR 提示词"
+                spellcheck="false"
+                autocomplete="off"
+              ></textarea>
+            </div>
+          </div>
+          <div class="notification is-warning" v-show="showQuestionTip">
+            OCR 提示词不能为空
+          </div>
+
+          <div class="control is-expanded">
+            <button
+              @click="sendRequest"
+              class="button is-warning is-fullwidth"
+              :disabled="loading"
+              :class="{ 'is-loading': loading }"
+            >
+              发起请求
+            </button>
+          </div>
+        </div>
+        <div class="column">
+          <h2 class="column-title">返回结果：</h2>
+          <div class="field">
+            <label class="label">OCR 结果：</label>
+            <textarea
+              ref="resultTextTextarea"
+              v-model="resultText"
+              class="textarea is-warning"
+              rows="20"
+              placeholder="输出结果"
+              spellcheck="false"
+              autocomplete="off"
+            ></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="/static/home/vue3.global.prod.js"></script>
+    <script>
+      const { createApp, ref, onMounted, watch } = Vue;
+
+      createApp({
+        setup() {
+          // 响应式数据
+          const address = ref("");
+          const key = ref("");
+          const modelName = ref("");
+          const beeName = ref("");
+          const question = ref("");
+          const resultText = ref("");
+          const resultTextTextarea = ref(null);
+          const showAddressTip = ref(false);
+          const showModelNameTip = ref(false);
+          const showBeeNameTip = ref(false);
+          const showQuestionTip = ref(false);
+          const loading = ref(false);
+          const ocrImage = ref("");
+          const ocrServerImage = ref("");
+          const isImgZoom1 = ref(true);
+
+          let file_id = "";
+
+          // 监听图片理解选项变化，自动更新问题
+          watch(
+            () => beeName.value,
+            (newValue) => {
+              ocrServerImage.value = newValue + ocrImage.value;
+            }
+          );
+
+          watch(
+            () => ocrImage.value,
+            (newValue) => {
+              ocrServerImage.value = beeName.value + newValue;
+            }
+          );
+
+          // 本地存储键名映射
+          const storageKeys = {
+            address: "ocr_address",
+            key: "ocr_key",
+            modelName: "ocr_modelName",
+            question: "ocr_question",
+            resultText: "ocr_resultText",
+            beeName: "ocr_beeName",
+            ocrImage: "ocr_ocrImage"
+          };
+
+          // 从本地存储加载数据
+          const loadFromStorage = () => {
+            address.value =
+              localStorage.getItem(storageKeys.address) ||
+              `${location.origin}/ocr`;
+            key.value = localStorage.getItem(storageKeys.key) || "";
+            modelName.value =
+              localStorage.getItem(storageKeys.modelName) || "deepseek-ocr";
+            question.value =
+              localStorage.getItem(storageKeys.question) || "Free OCR.";
+            resultText.value =
+              localStorage.getItem(storageKeys.resultText) || "";
+            beeName.value =
+              localStorage.getItem(storageKeys.beeName) || "http://bee:8090";
+            ocrImage.value =
+              localStorage.getItem(storageKeys.ocrImage) || "/static/home/256x256.png";
+          };
+
+          // 只在请求成功后保存数据到本地存储
+          const saveToStorage = () => {
+            localStorage.setItem(storageKeys.address, address.value);
+            localStorage.setItem(storageKeys.key, key.value);
+            localStorage.setItem(storageKeys.modelName, modelName.value);
+            localStorage.setItem(storageKeys.question, question.value);
+            localStorage.setItem(storageKeys.resultText, resultText.value);
+            localStorage.setItem(storageKeys.beeName, beeName.value);
+            localStorage.setItem(storageKeys.ocrImage, ocrImage.value);
+          };
+
+          // 处理图片上传并转为 base64
+          const handleImageUpload = async (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (file_id.length > 0) {
+              await deleteFile(file_id);
+            }
+
+            // 创建 FormData
+            const formData = new FormData();
+            formData.append("upload_file", file);
+            const response = await fetch("/file/upload", {
+              method: "POST",
+              body: formData,
+            });
+
+            const resData = await response.json();
+            file_id = resData.file_id;
+            ocrImage.value = `/file/download/${file_id}?force_download=false`;
+            // 清空 input，确保同一张图能再次触发 change
+            event.target.value = "";
+          };
+
+          const toggleZoom1 = () => {
+            isImgZoom1.value = !isImgZoom1.value;
+          };
+
+          const scrollTextareaToBottom = (refTextarea) => {
+            let scheduled = false;
+
+            const innerScrollTextareaToBottom = () => {
+              if (scheduled) {
+                return;
+              }
+              scheduled = true;
+
+              requestAnimationFrame(() => {
+                if (refTextarea.value) {
+                  refTextarea.value.scrollTop = refTextarea.value.scrollHeight;
+                }
+                scheduled = false;
+              });
+            };
+
+            return innerScrollTextareaToBottom;
+          };
+
+          const scrollResultTextToBottom =
+            scrollTextareaToBottom(resultTextTextarea);
+
+          // 发送请求
+          const sendRequest = async () => {
+            // 重置提示信息
+            showAddressTip.value = false;
+            showModelNameTip.value = false;
+            showQuestionTip.value = false;
+            showBeeNameTip.value = false;
+
+            // 验证输入
+            if (!address.value.trim()) {
+              showAddressTip.value = true;
+              return;
+            }
+
+            if (!modelName.value.trim()) {
+              showModelNameTip.value = true;
+              return;
+            }
+
+            if (!question.value.trim()) {
+              showQuestionTip.value = true;
+              return;
+            }
+
+            if (!beeName.value.trim()) {
+              showBeeNameTip.value = true;
+              return;
+            }
+
+            loading.value = true;
+
+            try {
+              let content = null;
+
+              const response = await fetch(address.value, {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${key.value}`,
+                },
+                body: JSON.stringify({
+                  model: modelName.value,
+                  file: ocrServerImage.value,
+                  text: question.value,
+                }),
+              });
+
+              const resData = await response.json();
+
+              if (resData.text_content != undefined) {
+                resultText.value = resData.text_content;
+              }
+              await deleteFile(file_id);
+              // 请求成功后保存数据
+              saveToStorage();
+            } catch (error) {
+              console.error("Error:", error);
+              loading.value = false;
+            } finally {
+              loading.value = false;
+            }
+          };
+
+          const deleteFile = async (file_id) => {
+            const delResponse = await fetch(`/file/delete/${file_id}`, {
+              method: "DELETE",
+            });
+          };
+
+          // 组件挂载时加载本地存储
+          onMounted(() => {
+            loadFromStorage();
+            scrollResultTextToBottom();
+          });
+
+          return {
+            address,
+            key,
+            modelName,
+            beeName,
+            question,
+            resultText,
+            resultTextTextarea,
+            showAddressTip,
+            showModelNameTip,
+            showBeeNameTip,
+            showQuestionTip,
+            loading,
+            ocrImage,
+            ocrServerImage,
+            isImgZoom1,
+            handleImageUpload,
+            sendRequest,
+            toggleZoom1,
+          };
+        },
+      }).mount("#app");
+    </script>
+  </body>
+</html>

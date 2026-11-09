@@ -3,11 +3,8 @@ FROM dhclly/bee/bee-base:v2.0.0-x86_64 AS build
 # 指定工作目录
 WORKDIR /app/bee
 
-COPY src .
-RUN rm -f .env
-COPY README.md ./README.md
-COPY change_log.txt ./change_log.txt
-COPY .python-version ./.python-version
+COPY app/ .
+RUN rm -f .env /app/bee/tini /app/bee/docker-entrypoint.sh
 
 RUN uv tool run pyclean .
 
@@ -19,8 +16,8 @@ WORKDIR /app/bee
 # 暴露端口
 EXPOSE 80
 
-COPY docker/linux-amd64/app-context/tini /tini
-COPY docker/linux-amd64/app-context/docker-entrypoint.sh /docker-entrypoint.sh
+COPY app/tini /tini
+COPY app/docker-entrypoint.sh /docker-entrypoint.sh
 
 # 设置权限
 RUN chmod +x /docker-entrypoint.sh /tini
