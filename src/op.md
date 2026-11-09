@@ -25,6 +25,9 @@ uv add <包名>
 
 # 5. 用 uv 命令运行脚本（无需手动激活虚拟环境）
 uv run main.py
+
+cd src
+uvicorn main:app --host 127.0.0.1 --port 8090 --reload
 ```
 
 ### 说明
