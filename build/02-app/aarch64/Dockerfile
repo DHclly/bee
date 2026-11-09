@@ -7,7 +7,7 @@ WORKDIR /app
 EXPOSE 80
 
 COPY app/ .
-RUN rm -f .env && chmod +x ./docker-entrypoint.sh ./tini
+RUN chmod +x ./docker-entrypoint.sh ./tini
 
 # 入口点
 ENTRYPOINT ["./tini", "--", "./docker-entrypoint.sh"]
